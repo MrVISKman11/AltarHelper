@@ -130,21 +130,66 @@ namespace AltarHelper
                                         // Clear all prior ModTiers to ensure a clean slate, or let existing non-scarab weights persist?
                                         // Let existing weights persist, just overwrite Scarabs so player can configure everything else separately.
                                         
-                                        foreach (var line in ninjaData.lines)
+                                        // First, iterate over all Altar Mods that mention "Scarab"
+                                        foreach (var mod in AltarModsConstants.AltarTypes)
                                         {
-                                            string scarabName = line.name.ToString();
-                                            float chaosValue = (float)line.chaosValue;
-
-                                            foreach (var mod in AltarModsConstants.AltarTypes)
+                                            if (mod.Name.Contains("Scarab", StringComparison.InvariantCultureIgnoreCase))
                                             {
-                                                if (mod.Name.Contains(scarabName, StringComparison.InvariantCultureIgnoreCase))
+                                                // Extract the base scarab name from the mod text, e.g. "Harvest Scarab"
+                                                // Regex match or simple string splitting. 
+                                                // "Final Boss drops # additional Harvest Scarabs" -> "Harvest Scarab"
+                                                // "(1.6-3.2)% chance to drop an additional Harvest Scarab" -> "Harvest Scarab"
+                                                string baseName = "";
+                                                var words = mod.Name.Split(' ');
+                                                for (int i = 0; i < words.Length; i++)
                                                 {
+                                                    if (words[i].StartsWith("Scarab", StringComparison.InvariantCultureIgnoreCase))
+                                                    {
+                                                        if (i > 0)
+                                                        {
+                                                            string prevWord = words[i - 1];
+                                                            if (prevWord.Equals("additional", StringComparison.InvariantCultureIgnoreCase) ||
+                                                                prevWord.Equals("Miscellaneous", StringComparison.InvariantCultureIgnoreCase) ||
+                                                                prevWord.Equals("drops", StringComparison.InvariantCultureIgnoreCase)) {
+                                                                    // For generic "drop an additional Scarab" modes
+                                                                    baseName = "Scarab"; 
+                                                            } else {
+                                                                baseName = $"{prevWord} Scarab";
+                                                            }
+                                                        }
+                                                        else baseName = "Scarab";
+                                                        break;
+                                                    }
+                                                }
+
+                                                if (string.IsNullOrEmpty(baseName)) continue;
+                                                if (baseName == "Scarab") continue; // Skip generic catch-all duplication modifiers for now
+
+                                                // Find all ninja lines containing this base name
+                                                float totalChaos = 0;
+                                                int matchCount = 0;
+
+                                                foreach (var line in ninjaData.lines)
+                                                {
+                                                    string nameStr = line.name.ToString();
+                                                    // This matches "Harvest Scarab", "Harvest Scarab of Doubling", etc.
+                                                    if (nameStr.Contains(baseName, StringComparison.InvariantCultureIgnoreCase))
+                                                    {
+                                                        totalChaos += (float)line.chaosValue;
+                                                        matchCount++;
+                                                    }
+                                                }
+
+                                                if (matchCount > 0)
+                                                {
+                                                    float avgChaos = totalChaos / matchCount;
+                                                    
                                                     float mult = 1.0f;
                                                     if (mod.Type.Equals("Minion", StringComparison.InvariantCultureIgnoreCase)) mult = minMult;
                                                     else if (mod.Type.Equals("Boss", StringComparison.InvariantCultureIgnoreCase)) mult = bossMult;
                                                     else if (mod.Type.Equals("Player", StringComparison.InvariantCultureIgnoreCase)) mult = playMult;
 
-                                                    ModTiers[mod.Id] = (int)(chaosValue * mult);
+                                                    ModTiers[mod.Id] = (int)(avgChaos * mult);
                                                 }
                                             }
                                         }
