@@ -26,6 +26,15 @@ namespace AltarHelper
         public DebugSettings DebugSettings { get; set; } = new DebugSettings();
 
         [JsonIgnore]
+        public int _selectedLeagueIndex = 0;
+        [JsonIgnore]
+        public float _minionMultiplier = 10.0f;
+        [JsonIgnore]
+        public float _bossMultiplier = 1.0f;
+        [JsonIgnore]
+        public float _playerMultiplier = 1.0f;
+
+        [JsonIgnore]
         public CustomNode Tribes { get; }
 
         public Settings()
@@ -88,6 +97,65 @@ namespace AltarHelper
                                     }
                                 }
                             }
+                        }
+                        ImGui.Separator();
+
+                        ImGui.Text("PoE.Ninja Auto-Generator");
+                        var leagues = new string[] { "Keepers", "Hardcore Keepers", "Standard", "Hardcore" };
+                        // Note: Using static arrays / vars outside the UI loop correctly is needed to persist values between draws.
+                        // Setting generic static fields or using the dictionary would be safer, but capturing locals from Settings() might be enough since it's instantiated once.
+                        ImGui.Combo("League##Ninja", ref _selectedLeagueIndex, leagues, leagues.Length);
+                        ImGui.InputFloat("Minion Multiplier##Ninja", ref _minionMultiplier);
+                        ImGui.InputFloat("Boss Multiplier##Ninja", ref _bossMultiplier);
+                        ImGui.InputFloat("Player Multiplier##Ninja", ref _playerMultiplier);
+
+                        if (ImGui.Button("Generate PoE.Ninja Profile"))
+                        {
+                            string targetLeague = leagues[_selectedLeagueIndex];
+                            float minMult = _minionMultiplier;
+                            float bossMult = _bossMultiplier;
+                            float playMult = _playerMultiplier;
+                            string saveDir = _profilesDir;
+
+                            System.Threading.Tasks.Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    using var client = new System.Net.Http.HttpClient();
+                                    var response = await client.GetStringAsync($"https://poe.ninja/api/data/itemoverview?league={targetLeague}&type=Scarab");
+                                    var ninjaData = JsonConvert.DeserializeObject<dynamic>(response);
+
+                                    if (ninjaData?.lines != null)
+                                    {
+                                        // Clear all prior ModTiers to ensure a clean slate, or let existing non-scarab weights persist?
+                                        // Let existing weights persist, just overwrite Scarabs so player can configure everything else separately.
+                                        
+                                        foreach (var line in ninjaData.lines)
+                                        {
+                                            string scarabName = line.name.ToString();
+                                            float chaosValue = (float)line.chaosValue;
+
+                                            foreach (var mod in AltarModsConstants.AltarTypes)
+                                            {
+                                                if (mod.Name.Contains(scarabName, StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    float mult = 1.0f;
+                                                    if (mod.Type.Equals("Minion", StringComparison.InvariantCultureIgnoreCase)) mult = minMult;
+                                                    else if (mod.Type.Equals("Boss", StringComparison.InvariantCultureIgnoreCase)) mult = bossMult;
+                                                    else if (mod.Type.Equals("Player", StringComparison.InvariantCultureIgnoreCase)) mult = playMult;
+
+                                                    ModTiers[mod.Id] = (int)(chaosValue * mult);
+                                                }
+                                            }
+                                        }
+
+                                        var savePath = Path.Combine(saveDir, $"Ninja_{targetLeague}.json");
+                                        var profileData = new { Tiers = ModTiers, Alerts = ModAlerts };
+                                        File.WriteAllText(savePath, JsonConvert.SerializeObject(profileData, Formatting.Indented));
+                                    }
+                                }
+                                catch { }
+                            });
                         }
                         ImGui.Separator();
 
