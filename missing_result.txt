@@ -1,0 +1,17 @@
+--- MISSING MODS ---
+ORIGINAL: (-60—-40)% to Cold Resistance 
+-> PARSED AS: #% to Cold Resistance
+ORIGINAL: (-60—-40)% to Lightning Resistance 
+-> PARSED AS: #% to Lightning Resistance
+ORIGINAL: (-60—-40)% to Fire Resistance 
+-> PARSED AS: #% to Fire Resistance
+ORIGINAL: (-60—-40)% to Chaos Resistance 
+-> PARSED AS: #% to Chaos Resistance
+ORIGINAL: (1.6—3.2)% chance to drop an additional Kalguuran Scarab 
+-> PARSED AS: #% chance to drop an additional Kalguuran Scarab
+ORIGINAL: Final Boss drops (2—4) additional Kalguuran Scarabs 
+-> PARSED AS: Final Boss drops # additional Kalguuran Scarabs
+ORIGINAL: (1.6—3.2)% chance to drop an additional Titanic Scarab 
+-> PARSED AS: #% chance to drop an additional Titanic Scarab
+ORIGINAL: Final Boss drops (2—4) additional Titanic Scarabs 
+-> PARSED AS: Final Boss drops # additional Titanic Scarabs

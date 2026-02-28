@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
@@ -31,7 +32,13 @@ namespace AltarHelper
         {
 
             var unitFilter = "";
-            var tribeFilter = "";
+            var profileName = "";
+            var selectedProfileIndex = 0;
+            var _pluginDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Compiled", "AltarHelper");
+            var _profilesDir = Path.Combine(_pluginDir, "Profiles");
+
+            try { if (!Directory.Exists(_profilesDir)) Directory.CreateDirectory(_profilesDir); } catch { }
+
 #pragma warning disable CA1416 // Validar a compatibilidade da plataforma
             Tribes = new CustomNode
             {
@@ -39,42 +46,115 @@ namespace AltarHelper
                 {
                     if (ImGui.TreeNode("Mods & Weight"))
                     {
+                        var profiles = new List<string>();
+                        if (Directory.Exists(_profilesDir))
+                        {
+                            profiles = Directory.GetFiles(_profilesDir, "*.json")
+                                .Select(Path.GetFileNameWithoutExtension)
+                                .ToList();
+                        }
+                        
+                        ImGui.InputTextWithHint("##ProfileName", "New Profile Name", ref profileName, 100);
+                        ImGui.SameLine();
+                        if (ImGui.Button("Save Profile") && !string.IsNullOrWhiteSpace(profileName))
+                        {
+                            var savePath = Path.Combine(_profilesDir, $"{profileName}.json");
+                            var profileData = new { Tiers = ModTiers, Alerts = ModAlerts };
+                            File.WriteAllText(savePath, JsonConvert.SerializeObject(profileData, Formatting.Indented));
+                            profileName = ""; // clear input
+                        }
+
+                        if (profiles.Count > 0)
+                        {
+                            ImGui.Combo("##ProfileSelect", ref selectedProfileIndex, profiles.ToArray(), profiles.Count);
+                            ImGui.SameLine();
+                            if (ImGui.Button("Load Profile"))
+                            {
+                                if (selectedProfileIndex >= 0 && selectedProfileIndex < profiles.Count)
+                                {
+                                    var loadPath = Path.Combine(_profilesDir, $"{profiles[selectedProfileIndex]}.json");
+                                    if (File.Exists(loadPath))
+                                    {
+                                        try
+                                        {
+                                            var json = File.ReadAllText(loadPath);
+                                            var loadedData = JsonConvert.DeserializeObject<dynamic>(json);
+                                            if (loadedData != null)
+                                            {
+                                                ModTiers = JsonConvert.DeserializeObject<Dictionary<string, int>>(loadedData.Tiers.ToString()) ?? new Dictionary<string, int>();
+                                                ModAlerts = JsonConvert.DeserializeObject<Dictionary<string, bool>>(loadedData.Alerts.ToString()) ?? new Dictionary<string, bool>();
+                                            }
+                                        } catch { }
+                                    }
+                                }
+                            }
+                        }
+                        ImGui.Separator();
+
                         ImGui.InputTextWithHint("##UnitFilter", "Filter", ref unitFilter, 100);
 
-                        if (ImGui.BeginTable("UnitConfig", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Borders))
+                        Action<string, string> DrawTable = (faction, targetType) =>
                         {
-                            ImGui.TableSetupColumn("Weight", ImGuiTableColumnFlags.WidthFixed, 200);
-                            ImGui.TableSetupColumn("Mod");
-                            ImGui.TableSetupColumn("Type");
-                            ImGui.TableSetupColumn("Audio Alert");
-                            ImGui.TableHeadersRow();
-                            foreach (var (id, name, type) in AltarModsConstants.AltarTypes.Where(t => t.Name.Contains(unitFilter, StringComparison.InvariantCultureIgnoreCase)))
+                            var filtered = AltarModsConstants.AltarTypes.Where(t =>
+                                (t.Faction == faction || t.Faction == "Both" || t.Faction == "Unknown") &&
+                                t.Type.Equals(targetType, StringComparison.InvariantCultureIgnoreCase) &&
+                                t.Name.Contains(unitFilter, StringComparison.InvariantCultureIgnoreCase)
+                            ).ToList();
+
+                            if (filtered.Count == 0) return;
+
+                            if (ImGui.BeginTable($"UnitConfig_{faction}_{targetType}", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Borders))
                             {
-                                ImGui.PushID($"unit{id}");
-                                ImGui.TableNextRow(ImGuiTableRowFlags.None);
-                                ImGui.TableNextColumn();
-                                ImGui.SetNextItemWidth(200);
-                                var currentValue = GetModTier(id);
-                                if (ImGui.SliderInt($"", ref currentValue, -1000, 1000))
+                                ImGui.TableSetupColumn("Weight", ImGuiTableColumnFlags.WidthFixed, 200);
+                                ImGui.TableSetupColumn("Mod");
+                                ImGui.TableSetupColumn("Type");
+                                ImGui.TableSetupColumn("Audio Alert");
+                                ImGui.TableHeadersRow();
+
+                                foreach (var (id, name, type, modFaction) in filtered)
                                 {
-                                    ModTiers[id] = currentValue;
-                                }
-                                ImGui.TableNextColumn();
-                                ImGui.Text(name);
-                                ImGui.TableNextColumn();
-                                ImGui.Text(type);
-                                ImGui.SetNextItemWidth(50);
-                                ImGui.TableNextColumn();
-                                var currentAlertValue = GetModAlert(id);
-                                if (ImGui.Checkbox($"Alert", ref currentAlertValue))
-                                {
-                                    ModAlerts[id] = currentAlertValue;
+                                    ImGui.PushID($"unit{id}{faction}{targetType}");
+                                    ImGui.TableNextRow(ImGuiTableRowFlags.None);
+                                    ImGui.TableNextColumn();
+                                    ImGui.SetNextItemWidth(200);
+                                    var currentValue = GetModTier(id);
+                                    if (ImGui.InputInt($"", ref currentValue))
+                                    {
+                                        ModTiers[id] = currentValue;
+                                    }
+                                    ImGui.TableNextColumn();
+                                    ImGui.Text(name);
+                                    ImGui.TableNextColumn();
+                                    ImGui.Text(type);
+                                    ImGui.SetNextItemWidth(50);
+                                    ImGui.TableNextColumn();
+                                    var currentAlertValue = GetModAlert(id);
+                                    if (ImGui.Checkbox($"Alert", ref currentAlertValue))
+                                    {
+                                        ModAlerts[id] = currentAlertValue;
+                                    }
+
+                                    ImGui.PopID();
                                 }
 
-                                ImGui.PopID();
+                                ImGui.EndTable();
                             }
+                        };
 
-                            ImGui.EndTable();
+                        if (ImGui.TreeNode("Eater of Worlds"))
+                        {
+                            if (ImGui.TreeNode("Final Boss")) { DrawTable("Eater", "Boss"); ImGui.TreePop(); }
+                            if (ImGui.TreeNode("Eldritch Minions")) { DrawTable("Eater", "Minion"); ImGui.TreePop(); }
+                            if (ImGui.TreeNode("Player")) { DrawTable("Eater", "Player"); ImGui.TreePop(); }
+                            ImGui.TreePop();
+                        }
+
+                        if (ImGui.TreeNode("Searing Exarch"))
+                        {
+                            if (ImGui.TreeNode("Final Boss")) { DrawTable("Exarch", "Boss"); ImGui.TreePop(); }
+                            if (ImGui.TreeNode("Eldritch Minions")) { DrawTable("Exarch", "Minion"); ImGui.TreePop(); }
+                            if (ImGui.TreeNode("Player")) { DrawTable("Exarch", "Player"); ImGui.TreePop(); }
+                            ImGui.TreePop();
                         }
 
                         ImGui.TreePop();

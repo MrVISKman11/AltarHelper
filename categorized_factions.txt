@@ -1,22 +1,75 @@
-﻿using System.Collections.Generic;
+UNKNOWNS: 67
+ - All Damage with Hits can Chill
+ - Cover Enemies in Frost on Hit
+ - +#% to maximum Fire Resistance
+ - +#% to maximum Chaos Resistance
+ - Gain #% of Physical Damage as Extra Fire Damage
+ - Hits always Ignite
+ - Gain #% of Physical Damage as Extra Fire Damage
+ - Gain #% of Physical Damage as Extra Chaos Damage
+ - #% increased Armour
+ - #% increased Evasion Rating
+ - hinder aura behaviour variation [#]
+ - Final Boss drops # additional Greater Eldritch Embers
+ - Final Boss drops # additional Greater Eldritch Ember
+ - Drops Burning Ground on Death, lasting # seconds
+ - +#% to maximum Fire Resistance
+ - +#% to maximum Chaos Resistance
+ - #% increased Area of Effect
+ - #% increased Evasion Rating
+ - Hits always Ignite
+ - Curse Enemies with Vulnerability on Hit
+ - Gain #% of Physical Damage as Extra Chaos Damage
+ - Gain #% of Physical Damage as Extra Fire Damage
+ - #% chance to drop an additional Eldritch Orb of Annulment
+ - #% chance to drop an additional Divination Card which rewards Currency
+ - #% chance to drop an additional Divination Card which rewards Basic Currency
+ - #% chance to drop an additional Divination Card which rewards League Currency
+ - #% chance to drop an additional Divination Card which rewards other Divination Cards
+ - #% chance to drop an additional Divination Card which rewards Gems
+ - #% chance to drop an additional Divination Card which rewards Levelled Gems
+ - #% chance to drop an additional Divination Card which rewards Quality Gems
+ - #% chance to drop an additional Orb of Binding
+ - #% chance to drop an additional Orb of Horizons
+ - #% chance to drop an additional Orb of Unmaking
+ - #% chance to drop an additional Lesser Eldritch Ember
+ - #% chance to drop an additional Grand Eldritch Ember
+ - #% chance to drop an additional Orb of Annulment
+ - #% chance to drop an additional Vaal Orb
+ - #% chance to drop an additional Enkindling Orb
+ - #% chance to drop an additional Instilling Orb
+ - #% chance to drop an additional Orb of Regret
+ - #% chance to drop an additional Glassblower's Bauble
+ - #% chance to drop an additional Gemcutter's Prism
+ - #% chance to drop an additional Divination Card which rewards a Unique Weapon
+ - #% chance to drop an additional Divination Card which rewards a Map
+ - #% chance to drop an additional Divination Card which rewards a Unique Map
+ - #% chance to drop an additional Lesser Eldritch Ember
+ - #% chance to drop an additional Grand Eldritch Ember
+ - #% chance to drop an additional Influence Scarab
+ - #% chance to drop an additional Cartography Scarab
+ - #% chance to drop an additional Divination Scarab
+ - #% chance to drop an additional Anarchy Scarab
+ - #% chance to drop an additional Harbinger Scarab
+ - #% chance to drop an additional Miscellaneous Scarab
+ - #% chance to drop an additional Beyond Scarab
+ - #% chance to drop an additional Torment Scarab
+ - #% chance to drop an additional Ambush Scarab
+ - #% chance to drop an additional Domination Scarab
+ - #% chance to drop an additional Essence Scarab
+ - #% chance to drop an additional Reliquary Scarab
+ - Projectiles are fired in random directions
+ - #% increased Flask Charges used
+ - #% reduced Flask Effect Duration
+ - #% chance to be Scorched when Hit
+ - Curses you inflict are reflected back to you
+ - Nearby Enemies Gain #% of their Physical Damage as Extra Fire Damage
+ - Nearby Enemies Gain #% of their Physical Damage as Extra Chaos Damage
+ - #% chance to drop an additional Titanic Scarab
 
-namespace AltarHelper
-{
-    internal static class AltarModsConstants
-    {
-        public static Dictionary<string, AffectedTarget> FilterTargetDict { get; } = new Dictionary<string, AffectedTarget> {
-            { "Any", AffectedTarget.Any },
-            { "Player", AffectedTarget.Player },
-            { "Minion", AffectedTarget.Minions },
-            { "Boss", AffectedTarget.FinalBoss }
-        };
-        public static Dictionary<string, AffectedTarget> AltarTargetDict { get; } = new Dictionary<string, AffectedTarget> {
-            { "Player gains:", AffectedTarget.Player },
-            { "Eldritch Minions gain:", AffectedTarget.Minions },
-            { "Map boss gains:", AffectedTarget.FinalBoss }
-        };
 
-        public static readonly IReadOnlyList<(string Id, string Name, string Type, string Faction)> AltarTypes = new List<(string, string, string, string)>
+// C# REPLACEMENT FOR AltarTypes
+public static readonly IReadOnlyList<(string Id, string Name, string Type, string Faction)> AltarTypes = new List<(string, string, string, string)>
 {
     ("+#%% to maximum Cold Resistance", "+10%%%% to maximum Cold Resistance", "Boss", "Eater"),
     ("+#%% to Cold Resistance", "+80%%%% to Cold Resistance", "Boss", "Eater"),
@@ -299,23 +352,3 @@ namespace AltarHelper
     ("#%% chance to drop an additional Titanic Scarab", "(1.6-3.2)%%%% chance to drop an additional Titanic Scarab", "Minion", "Unknown"),
     ("Final Boss drops # additional Titanic Scarabs", "Final Boss drops (2-4) additional Titanic Scarabs", "Boss", "Exarch"),
 };
-    }
-
-    public enum AffectedTarget
-    {
-        Any = 0,
-        Player = 1,
-        Minions = 2,
-        FinalBoss = 3,
-    }
-    public enum EffectType
-    {
-        Neutral,
-        Upside,
-        Downside,
-    }
-
-
-
-}
-

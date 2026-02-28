@@ -1,0 +1,311 @@
+// Please paste your extracted PoeDB Eldritch Altar modifiers below this line.
+// We will then read this file and compare against AltarModsConstants.cs
+
+Map boss gains: +10% to maximum Cold Resistance
++80% to Cold Resistance
++10% to maximum Lightning Resistance
++80% to Lightning Resistance
+Map boss gains: (50—70)% additional Physical Damage Reduction
+Map boss gains: All Damage with Hits can Chill
+Map boss gains: Hits always Shock
+All Damage can Shock
+Map boss gains: Prevent +(20—30)% of Suppressed Spell Damage
++100% chance to Suppress Spell Damage
+Map boss gains: Gain (50—80)% of Physical Damage as Extra Damage of a random Element
+Damage Penetrates (15—25)% of Enemy Elemental Resistances
+Map boss gains: Gain (50—80)% of Physical Damage as Extra Cold Damage
+Cover Enemies in Frost on Hit
+Map boss gains: 100% Global chance to Blind Enemies on hit
+(100—200)% increased Blind Effect
+Map boss gains: Gain (50—70)% of Maximum Life as Extra Maximum Energy Shield
+Map boss gains: Gain (70—130)% of Physical Damage as Extra Cold Damage
+All Damage with Hits can Chill
+Map boss gains: Hits always Shock
+Gain (70—130)% of Physical Damage as Extra Lightning Damage
+All Damage can Shock
+Map boss gains: Eldritch Tentacles
+Eldritch Minions gain: Hits have (50—80)% chance to ignore Enemy Physical Damage Reduction
+Eldritch Minions gain: Skills fire (3—5) additional Projectiles
+Eldritch Minions gain: (30—50)% increased Attack Speed
+(30—50)% increased Cast Speed
+(30—50)% increased Movement Speed
+Eldritch Minions gain: +10% to maximum Cold Resistance
++80% to Cold Resistance
++10% to maximum Lightning Resistance
++80% to Lightning Resistance
+Eldritch Minions gain: (50—80)% additional Physical Damage Reduction
+Eldritch Minions gain: Prevent +(20—30)% of Suppressed Spell Damage
++100% chance to Suppress Spell Damage
+Eldritch Minions gain: 100% chance to remove a random Charge from Enemy on Hit
+Eldritch Minions gain: Drops Chilled Ground on Death, lasting 3 seconds
+Eldritch Minions gain: 100% chance to create Shocked Ground on Death, lasting 3 seconds
+Eldritch Minions gain: Inflict 1 Grasping Vine on Hit
+Eldritch Minions gain: Curse Enemies with Punishment on Hit
+Eldritch Minions gain: Gain (70—130)% of Physical Damage as Extra Lightning Damage
+Eldritch Minions gain: Gain (70—130)% of Physical Damage as Extra Cold Damage
+Player gains: (-60—-40)% to Cold Resistance
+(-60—-40)% to Lightning Resistance
+Player gains: (-60—-40)% additional Physical Damage Reduction
+Player gains: (30—50)% reduced Defences per Frenzy Charge
+Player gains: (10—20)% reduced Recovery Rate of Life, Mana and Energy Shield per Endurance Charge
+Player gains: (-40—-20)% to Critical Strike Multiplier per Power Charge
+Player gains: (25—35)% chance for Enemies to drop Chilled Ground when Hitting you, no more than once every 2 seconds
+Player gains: (25—35)% chance for Enemies to drop Shocked Ground when Hitting you, no more than once every 2 seconds
+Player gains: All Damage taken from Hits can Sap you
+(25—35)% chance to be Sapped when Hit
+Player gains: Nearby Enemies Gain 100% of their Physical Damage as Extra Cold Damage
+Player gains: Nearby Enemies Gain 100% of their Physical Damage as Extra Lightning Damage
+Player gains: Projectiles are fired in random directions
+Player gains: Spell Hits have (25—35)% chance to Hinder you
+Player gains: Non-Damaging Ailments you inflict are reflected back to you
+Player gains: number of grasping vines to gain every second while stationary [1]
+Map boss gains: Create Consecrated Ground on Hit, lasting 6 seconds
+Map boss gains: +10% to maximum Fire Resistance
++80% to Fire Resistance
++10% to maximum Chaos Resistance
++80% to Chaos Resistance
+Map boss gains: +50000 to Armour
+Map boss gains: Gain (50—80)% of Physical Damage as Extra Fire Damage
+Cover Enemies in Ash on Hit
+Map boss gains: Hits always Ignite
+All Damage can Ignite
+Map boss gains: Poison on Hit
+All Damage from Hits can Poison
+Map boss gains: Enemies lose 6 Flask Charges every 3 seconds and cannot gain Flask Charges for 6 seconds after being Hit
+Map boss gains: Gain (50—80)% of Physical Damage as Extra Damage of a random Element
+Damage Penetrates (15—25)% of Enemy Elemental Resistances
+Map boss gains: Your hits inflict Malediction
+Map boss gains: Hits always Ignite
+Gain (70—130)% of Physical Damage as Extra Fire Damage
+All Damage can Ignite
+Map boss gains: Gain (70—130)% of Physical Damage as Extra Chaos Damage
+Poison on Hit
+All Damage from Hits can Poison
+Map boss gains: (100—200)% increased Armour
+(100—200)% increased Evasion Rating
+Map boss gains: Nearby Enemies are Hindered, with 40% reduced Movement Speed
+Eldritch Minions gain: Drops Burning Ground on Death, lasting 3 seconds
+Eldritch Minions gain: Create Consecrated Ground on Death, lasting 6 seconds
+Eldritch Minions gain: Gain (70—130)% of Physical Damage as Extra Damage of a random Element
+Inflict Fire, Cold, and Lightning Exposure on Hit
+Eldritch Minions gain: Enemies lose 6 Flask Charges every 3 seconds and cannot gain Flask Charges for 6 seconds after being Hit
+Eldritch Minions gain: +10% to maximum Fire Resistance
++80% to Fire Resistance
++10% to maximum Chaos Resistance
++80% to Chaos Resistance
+Eldritch Minions gain: +50000 to Armour
+Eldritch Minions gain: (70—130)% increased Area of Effect
+Eldritch Minions gain: (250—500)% increased Evasion Rating
+Eldritch Minions gain: Hits always Ignite
+All Damage can Ignite
+Eldritch Minions gain: Poison on Hit
+All Damage from Hits can Poison
+Eldritch Minions gain: Curse Enemies with Vulnerability on Hit
+Eldritch Minions gain: Gain (70—130)% of Physical Damage as Extra Chaos Damage
+Eldritch Minions gain: Gain (70—130)% of Physical Damage as Extra Fire Damage
+Player gains: (-60—-40)% to Fire Resistance
+(-60—-40)% to Chaos Resistance
+Player gains: -3000 to Armour
+-3000 to Evasion Rating
+Player gains: (20—40)% increased Flask Charges used
+(40—60)% reduced Flask Effect Duration
+Player gains: Take 600 Chaos Damage per second during any Flask Effect
+Player gains: Spell Hits have (20—30)% chance to Hinder you
+Player gains: All Damage taken from Hits can Scorch you
+(25—35)% chance to be Scorched when Hit
+Player gains: Curses you inflict are reflected back to you
+Player gains: (15—20)% chance for Enemies to drop Burning Ground when Hitting you, no more than once every 2 seconds
+Player gains: 30% chance to be targeted by a Meteor when you use a Flask
+Player gains: Nearby Enemies Gain 100% of their Physical Damage as Extra Fire Damage
+Player gains: Nearby Enemies Gain 100% of their Physical Damage as Extra Chaos Damage
+Map boss gains: Final Boss drops (2—4) additional Divine Orbs
+Map boss gains: Final Boss drops (2—4) additional Exalted Orbs
+Map boss gains: Final Boss drops (2—4) additional Regal Orbs
+Map boss gains: Final Boss drops (2—4) additional Lesser Eldritch Ichors
+Map boss gains: Final Boss drops (2—4) additional Greater Eldritch Ichors
+Map boss gains: Final Boss drops (2—4) additional Grand Eldritch Ichors
+Map boss gains: Final Boss drops (2—4) additional Eldritch Chaos Orbs
+Map boss gains: Final Boss drops (2—4) additional Eldritch Exalted Orbs
+Map boss gains: Final Boss drops (2—4) additional Eldritch Orbs of Annulment
+Map boss gains: Final Boss drops (2—4) additional Chaos Orbs
+Map boss gains: Final Boss drops (2—4) additional Orbs of Alteration
+Map boss gains: Final Boss drops (2—4) additional Blessed Orbs
+Map boss gains: Final Boss drops (2—4) additional Orbs of Scouring
+Map boss gains: Final Boss drops (2—4) additional Chromatic Orbs
+Map boss gains: Final Boss drops (2—4) additional Orbs of Fusing
+Map boss gains: Final Boss drops (2—4) additional Jeweller's Orbs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divine Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Exalted Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Regal Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Lesser Eldritch Ichor
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Greater Eldritch Ichor
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Grand Eldritch Ichor
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Eldritch Chaos Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Eldritch Exalted Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Eldritch Orb of Annulment
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Chaos Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Alteration
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Blessed Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Scouring
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Chromatic Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Fusing
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Jeweller's Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards Currency
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards Basic Currency
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards League Currency
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards other Divination Cards
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards Gems
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards Levelled Gems
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards Quality Gems
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward Currency
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward Basic Currency
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward League Currency
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward other Divination Cards
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward Gems
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward Levelled Gems
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward Quality Gems
+Player gains: Basic Currency Items dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Gems dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Unique Items dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Scarabs dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Maps dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Divination Cards dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: (10—20)% increased Quantity of Items found in this Area
+Player gains: (15—30)% increased Rarity of Items found in this Area
+Map boss gains: Final Boss drops (2—4) additional Divine Orbs
+Map boss gains: Final Boss drops (2—4) additional Orbs of Binding
+Map boss gains: Final Boss drops (2—4) additional Orbs of Horizons
+Map boss gains: Final Boss drops (2—4) additional Orbs of Unmaking
+Map boss gains: Final Boss drops (2—4) additional Cartographer's Chisels
+Map boss gains: Final Boss drops (2—4) additional Lesser Eldritch Embers
+Map boss gains: Final Boss drops (2—4) additional Greater Eldritch Embers
+Map boss gains: Final Boss drops (2—4) additional Grand Eldritch Embers
+Map boss gains: Final Boss drops (2—4) additional Eldritch Chaos Orbs
+Map boss gains: Final Boss drops (2—4) additional Eldritch Exalted Orbs
+Map boss gains: Final Boss drops (2—4) additional Eldritch Orbs of Annulment
+Map boss gains: Final Boss drops (2—4) additional Orbs of Annulment
+Map boss gains: Final Boss drops (2—4) additional Vaal Orbs
+Map boss gains: Final Boss drops (2—4) additional Enkindling Orbs
+Map boss gains: Final Boss drops (2—4) additional Instilling Orbs
+Map boss gains: Final Boss drops (2—4) additional Orbs of Regret
+Map boss gains: Final Boss drops (2—4) additional Glassblower's Baubles
+Map boss gains: Final Boss drops (2—4) additional Gemcutter's Prisms
+Map boss gains: Final Boss drops (2—4) additional Chaos Orbs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divine Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Binding
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Horizons
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Unmaking
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Cartographer's Chisel
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Lesser Eldritch Ember
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Greater Eldritch Ember
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Grand Eldritch Ember
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Eldritch Chaos Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Eldritch Exalted Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Eldritch Orb of Annulment
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Annulment
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Vaal Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Enkindling Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Instilling Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Orb of Regret
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Glassblower's Bauble
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Gemcutter's Prism
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Chaos Orb
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Unique Item
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Unique Weapon
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Unique Armour
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards Unique Jewellery
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Corrupted Unique Item
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Map
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Unique Map
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Card which rewards a Corrupted Item
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Unique Item
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Unique Weapon
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Unique Armour
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward Unique Jewellery
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Corrupted Unique Item
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Map
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Unique Map
+Map boss gains: Final Boss drops (2—4) additional Divination Cards which reward a Corrupted Item
+Player gains: Basic Currency Items dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Unique Items dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Scarabs dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Maps dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: Divination Cards dropped by slain Enemies have (15—30)% chance to be Duplicated
+Player gains: (10—20)% increased Quantity of Items found in this Area
+Player gains: (15—30)% increased Rarity of Items found in this Area
+Eldritch Minions gain: (1.2—2.4)% chance to drop an additional Lesser Eldritch Ichor
+Eldritch Minions gain: (1.2—2.4)% chance to drop an additional Greater Eldritch Ichor
+Eldritch Minions gain: (1.2—2.4)% chance to drop an additional Grand Eldritch Ichor
+Map boss gains: Final Boss drops 1 additional Lesser Eldritch Ichor
+Map boss gains: Final Boss drops 1 additional Greater Eldritch Ichor
+Map boss gains: Final Boss drops 1 additional Grand Eldritch Ichor
+Player gains: Basic Currency Items dropped by slain Enemies have (10—15)% chance to be Duplicated
+Player gains: Gems dropped by slain Enemies have (10—15)% chance to be Duplicated
+Player gains: Maps dropped by slain Enemies have (10—15)% chance to be Duplicated
+Player gains: (10—15)% increased Quantity of Items found in this Area
+Player gains: (5—10)% increased Rarity of Items found in this Area
+Player gains: (8—12)% increased Experience gain
+Eldritch Minions gain: (1.2—2.4)% chance to drop an additional Lesser Eldritch Ember
+Eldritch Minions gain: (1.2—2.4)% chance to drop an additional Greater Eldritch Ember
+Eldritch Minions gain: (1.2—2.4)% chance to drop an additional Grand Eldritch Ember
+Map boss gains: Final Boss drops 1 additional Lesser Eldritch Ember
+Map boss gains: Final Boss drops 1 additional Greater Eldritch Ember
+Map boss gains: Final Boss drops 1 additional Grand Eldritch Ember
+Player gains: Basic Currency Items dropped by slain Enemies have (10—15)% chance to be Duplicated
+Player gains: Gems dropped by slain Enemies have (10—15)% chance to be Duplicated
+Player gains: Maps dropped by slain Enemies have (10—15)% chance to be Duplicated
+Player gains: (10—15)% increased Quantity of Items found in this Area
+Player gains: (5—10)% increased Rarity of Items found in this Area
+Player gains: (8—12)% increased Experience gain
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Breach Scarab
+Map boss gains: Final Boss drops (2—4) additional Breach Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Delirium Scarab
+Map boss gains: Final Boss drops (2—4) additional Delirium Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Legion Scarab
+Map boss gains: Final Boss drops (2—4) additional Legion Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Blight Scarab
+Map boss gains: Final Boss drops (2—4) additional Blight Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Ritual Scarab
+Map boss gains: Final Boss drops (2—4) additional Ritual Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Harvest Scarab
+Map boss gains: Final Boss drops (2—4) additional Harvest Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Ultimatum Scarab
+Map boss gains: Final Boss drops (2—4) additional Ultimatum Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Abyss Scarab
+Map boss gains: Final Boss drops (2—4) additional Abyss Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Expedition Scarab
+Map boss gains: Final Boss drops (2—4) additional Expedition Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Betrayal Scarab
+Map boss gains: Final Boss drops (2—4) additional Betrayal Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Bestiary Scarab
+Map boss gains: Final Boss drops (2—4) additional Bestiary Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Incursion Scarab
+Map boss gains: Final Boss drops (2—4) additional Incursion Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Sulphite Scarab
+Map boss gains: Final Boss drops (2—4) additional Sulphite Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Kalguuran Scarab
+Map boss gains: Final Boss drops (2—4) additional Kalguuran Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Influence Scarab
+Map boss gains: Final Boss drops (2—4) additional Influence Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Cartography Scarab
+Map boss gains: Final Boss drops (2—4) additional Cartography Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Divination Scarab
+Map boss gains: Final Boss drops (2—4) additional Divination Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Anarchy Scarab
+Map boss gains: Final Boss drops (2—4) additional Anarchy Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Harbinger Scarab
+Map boss gains: Final Boss drops (2—4) additional Harbinger Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Miscellaneous Scarab
+Map boss gains: Final Boss drops (2—4) additional Miscellaneous Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Beyond Scarab
+Map boss gains: Final Boss drops (2—4) additional Beyond Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Torment Scarab
+Map boss gains: Final Boss drops (2—4) additional Torment Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Ambush Scarab
+Map boss gains: Final Boss drops (2—4) additional Ambush Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Domination Scarab
+Map boss gains: Final Boss drops (2—4) additional Domination Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Essence Scarab
+Map boss gains: Final Boss drops (2—4) additional Essence Scarabs
+Eldritch Minions gain: (1.6—3.2)% chance to drop an additional Titanic Scarab
+Map boss gains: Final Boss drops (2—4) additional Titanic Scarabs

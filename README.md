@@ -40,3 +40,12 @@ Special Thanks for #thanos6505 for help me with mods settings and tests
 * Added a Slide to add Bonus weight to minion or bosses mod
 * Added a hotkey to switch between modes
 * Added on git a example of filter.txt with all Upside mods and my particular weight
+
+======================02-28-26=====================
+### New UI Hierarchy & Profile Manager
+* The massive dropdown list has been fully reorganized into cleanly divided sections by **Eater of Worlds vs Searing Exarch**, and further broken down into **Final Boss**, **Eldritch Minions**, and **Player** targets.
+* The Mod Weight sliders have been converted to text input boxes, allowing faster and more precise manual number entry.
+* **Save/Load System added**: You can now manage different config setups seamlessly entirely from the UI.
+  - Type a name into the **"New Profile Name"** box and click **Save Profile**.
+  - This automatically saves your current tier weights into `ExileApi/Plugins/Compiled/AltarHelper/Profiles/{YourName}.json`.
+  - Use the dropdown below it to instantly swap to and **Load Profile** your existing config files for specific farming strategies.
