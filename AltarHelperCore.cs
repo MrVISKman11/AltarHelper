@@ -1,4 +1,4 @@
-﻿using ExileCore;
+using ExileCore;
 using ExileCore.PoEMemory.Elements;
 using ExileCore.Shared.Cache;
 using SharpDX;
@@ -376,16 +376,17 @@ namespace AltarHelper
 
         public FilterEntry GetEntry(string mod)
         {
-            var modWeight = Settings.GetModTier(mod);
+            var matchedMod = AltarModsConstants.AltarTypes.FirstOrDefault(t => t.Id.Contains(mod, StringComparison.InvariantCultureIgnoreCase));
+            var canonicalId = matchedMod.Id != null ? matchedMod.Id : mod;
 
-            var modAlert = Settings.GetModAlert(mod);
+            var modWeight = Settings.GetModTier(canonicalId);
+            var modAlert = Settings.GetModAlert(canonicalId);
 
             var modName = mod.Contains('(') && mod.Contains(')') ?
                             Regex.Replace(mod, @"\([^()]*\)", "#") :
                             Regex.Replace(mod, @"(\d+)(?:.\d)|\d+", "#");
 
-            var modType = AltarModsConstants.AltarTypes.FirstOrDefault(t => t.Id.Contains(mod, StringComparison.InvariantCultureIgnoreCase)).Type;
-
+            var modType = matchedMod.Type;
 
             FilterEntry filter = new()
             {
