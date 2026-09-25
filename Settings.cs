@@ -238,7 +238,7 @@ namespace AltarHelper
                                         ModTiers[id.Replace("%", "%%")] = currentValue;
                                     }
                                     ImGui.TableNextColumn();
-                                    ImGui.Text(name);
+                                    ImGui.Text(name.Replace('\u2013', '-').Replace('\u2014', '-'));
                                     ImGui.TableNextColumn();
                                     ImGui.Text(type);
                                     ImGui.SetNextItemWidth(50);
