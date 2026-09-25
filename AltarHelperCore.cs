@@ -376,11 +376,17 @@ namespace AltarHelper
 
         public FilterEntry GetEntry(string mod)
         {
-            var matchedMod = AltarModsConstants.AltarTypes.FirstOrDefault(t => t.Id.Contains(mod, StringComparison.InvariantCultureIgnoreCase));
+            var cleanMod = mod.Replace("%%", "%");
+            var matchedMod = AltarModsConstants.AltarTypes.FirstOrDefault(t =>
+                t.Id.Contains(mod, StringComparison.InvariantCultureIgnoreCase) ||
+                t.Id.Replace("%%", "%").Contains(cleanMod, StringComparison.InvariantCultureIgnoreCase));
+
             var canonicalId = matchedMod.Id != null ? matchedMod.Id : mod;
 
             var modWeight = Settings.GetModTier(canonicalId);
-            var modAlert = Settings.GetModAlert(canonicalId);
+            if (modWeight == 0) modWeight = Settings.GetModTier(cleanMod);
+
+            var modAlert = Settings.GetModAlert(canonicalId) || Settings.GetModAlert(cleanMod);
 
             var modName = mod.Contains('(') && mod.Contains(')') ?
                             Regex.Replace(mod, @"\([^()]*\)", "#") :
@@ -390,12 +396,12 @@ namespace AltarHelper
 
             FilterEntry filter = new()
             {
-                        Mod = modName,
-                        Weight = modWeight,
-                        IsUpside = modWeight > 0? true : false,
-                        Target = modType == null ?
-                AffectedTarget.Any :
-                AltarModsConstants.FilterTargetDict[modType],
+                Mod = modName,
+                Weight = modWeight,
+                IsUpside = modWeight > 0 ? true : false,
+                Target = modType == null ?
+                    AffectedTarget.Any :
+                    AltarModsConstants.FilterTargetDict[modType],
                 Alert = modAlert
             };
             return filter;

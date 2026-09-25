@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -234,6 +234,8 @@ namespace AltarHelper
                                     if (ImGui.InputInt($"", ref currentValue))
                                     {
                                         ModTiers[id] = currentValue;
+                                        ModTiers[id.Replace("%%", "%")] = currentValue;
+                                        ModTiers[id.Replace("%", "%%")] = currentValue;
                                     }
                                     ImGui.TableNextColumn();
                                     ImGui.Text(name);
@@ -245,6 +247,8 @@ namespace AltarHelper
                                     if (ImGui.Checkbox($"Alert", ref currentAlertValue))
                                     {
                                         ModAlerts[id] = currentAlertValue;
+                                        ModAlerts[id.Replace("%%", "%")] = currentAlertValue;
+                                        ModAlerts[id.Replace("%", "%%")] = currentAlertValue;
                                     }
 
                                     ImGui.PopID();
@@ -282,19 +286,97 @@ namespace AltarHelper
 
         public int GetModTier(string mod)
         {
-            return ModTiers.GetValueOrDefault(mod ?? "", 0);
+            if (string.IsNullOrEmpty(mod)) return 0;
+            if (ModTiers.TryGetValue(mod, out var val)) return val;
+            var normalized = mod.Replace("%%", "%");
+            if (ModTiers.TryGetValue(normalized, out val)) return val;
+            var doublePercent = mod.Replace("%", "%%");
+            if (ModTiers.TryGetValue(doublePercent, out val)) return val;
+            return 0;
         }
 
         public Dictionary<string, int> ModTiers = new()
         {
+            { "Final Boss drops # additional Divine Orbs", 700000000 },
+            { "Final Boss drops # additional Ancient Orbs", 500000 },
+            { "#%% chance to drop an additional Ancient Orb", 500000 },
+            { "#% chance to drop an additional Ancient Orb", 500000 },
+            { "#%% chance to drop an additional Divine Orb", 700000000 },
+            { "#% chance to drop an additional Divine Orb", 700000000 },
+            { "Final Boss drops # additional Breach Scarabs", 200000000 },
+            { "#%% chance to drop an additional Breach Scarab", 200000000 },
+            { "#% chance to drop an additional Breach Scarab", 200000000 },
+            { "Final Boss drops # additional Harvest Scarabs", 60000000 },
+            { "#%% chance to drop an additional Harvest Scarab", 60000000 },
+            { "#% chance to drop an additional Harvest Scarab", 60000000 },
+            { "Final Boss drops # additional Ambush Scarabs", 18000000 },
+            { "#%% chance to drop an additional Ambush Scarab", 18000000 },
+            { "#% chance to drop an additional Ambush Scarab", 18000000 },
+            { "Final Boss drops # additional Kalguuran Scarabs", 5500000 },
+            { "#%% chance to drop an additional Kalguuran Scarab", 5500000 },
+            { "#% chance to drop an additional Kalguuran Scarab", 5500000 },
+            { "Final Boss drops # additional Anarchy Scarabs", 1600000 },
+            { "#%% chance to drop an additional Anarchy Scarab", 1600000 },
+            { "#% chance to drop an additional Anarchy Scarab", 1600000 },
+            { "Final Boss drops # additional Ultimatum Scarabs", 500000 },
+            { "#%% chance to drop an additional Ultimatum Scarab", 500000 },
+            { "#% chance to drop an additional Ultimatum Scarab", 500000 },
+            { "Final Boss drops # additional Cartography Scarabs", 150000 },
+            { "#%% chance to drop an additional Cartography Scarab", 150000 },
+            { "#% chance to drop an additional Cartography Scarab", 150000 },
+            { "Final Boss drops # additional Bestiary Scarabs", 45000 },
+            { "#%% chance to drop an additional Bestiary Scarab", 45000 },
+            { "#% chance to drop an additional Bestiary Scarab", 45000 },
+            { "Basic Currency Items dropped by slain Enemies have #%% chance to be Duplicated", 13000 },
+            { "Basic Currency Items dropped by slain Enemies have #% chance to be Duplicated", 13000 },
+            { "Scarabs dropped by slain Enemies have #%% chance to be Duplicated", 13000 },
+            { "Scarabs dropped by slain Enemies have #% chance to be Duplicated", 13000 },
+            { "Final Boss drops # additional Grand Eldritch Embers", 9000 },
+            { "Final Boss drops # additional Grand Eldritch Ember", 9000 },
+            { "#%% chance to drop an additional Grand Eldritch Ember", 9000 },
+            { "#% chance to drop an additional Grand Eldritch Ember", 9000 },
+            { "Final Boss drops # additional Grand Eldritch Ichors", 6000 },
+            { "Final Boss drops # additional Grand Eldritch Ichor", 6000 },
+            { "#%% chance to drop an additional Grand Eldritch Ichor", 6000 },
+            { "#% chance to drop an additional Grand Eldritch Ichor", 6000 },
+            { "Divination Cards dropped by slain Enemies have #%% chance to be Duplicated", 4000 },
+            { "Divination Cards dropped by slain Enemies have #% chance to be Duplicated", 4000 },
+            { "Unique Items dropped by slain Enemies have #%% chance to be Duplicated", 4000 },
+            { "Unique Items dropped by slain Enemies have #% chance to be Duplicated", 4000 },
+            { "Maps dropped by slain Enemies have #%% chance to be Duplicated", 1200 },
+            { "Maps dropped by slain Enemies have #% chance to be Duplicated", 1200 },
+            { "#%% increased Quantity of Items found in this Area", 350 },
+            { "#% increased Quantity of Items found in this Area", 350 },
+            { "#%% increased Rarity of Items found in this Area", 101 },
+            { "#% increased Rarity of Items found in this Area", 101 }
         };
 
         public bool GetModAlert(string mod)
         {
-            return ModAlerts.GetValueOrDefault(mod ?? "", false);
+            if (string.IsNullOrEmpty(mod)) return false;
+            if (ModAlerts.TryGetValue(mod, out var val)) return val;
+            var normalized = mod.Replace("%%", "%");
+            if (ModAlerts.TryGetValue(normalized, out val)) return val;
+            var doublePercent = mod.Replace("%", "%%");
+            if (ModAlerts.TryGetValue(doublePercent, out val)) return val;
+            return false;
         }
         public Dictionary<string, bool> ModAlerts = new()
         {
+            { "Final Boss drops # additional Divine Orbs", true },
+            { "Final Boss drops # additional Ancient Orbs", true },
+            { "#%% chance to drop an additional Ancient Orb", true },
+            { "#% chance to drop an additional Ancient Orb", true },
+            { "#%% chance to drop an additional Divine Orb", true },
+            { "#% chance to drop an additional Divine Orb", true },
+            { "Final Boss drops # additional Breach Scarabs", true },
+            { "#%% chance to drop an additional Breach Scarab", true },
+            { "#% chance to drop an additional Breach Scarab", true },
+            { "Final Boss drops # additional Harvest Scarabs", true },
+            { "#%% chance to drop an additional Harvest Scarab", true },
+            { "#% chance to drop an additional Harvest Scarab", true },
+            { "#%% chance to drop an additional Grand Eldritch Ember", true },
+            { "#% chance to drop an additional Grand Eldritch Ember", true }
         };
 
 

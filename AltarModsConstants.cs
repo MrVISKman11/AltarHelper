@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace AltarHelper
 {
@@ -59,6 +59,7 @@ namespace AltarHelper
     ("Nearby Enemies are Hindered, with #%% reduced Movement Speed", "Nearby Enemies are Hindered, with 40%%%% reduced Movement Speed", "Boss", "Eater"),
     ("hinder aura behaviour variation [#]", "hinder aura behaviour variation [1]", "Boss", "Unknown"),
     ("Final Boss drops # additional Divine Orbs", "Final Boss drops (2–4) additional Divine Orbs", "Boss", "Both"),
+    ("Final Boss drops # additional Ancient Orbs", "Final Boss drops (2–4) additional Ancient Orbs", "Boss", "Both"),
     ("Final Boss drops # additional Exalted Orbs", "Final Boss drops (2–4) additional Exalted Orbs", "Boss", "Eater"),
     ("Final Boss drops # additional Regal Orbs", "Final Boss drops (2–4) additional Regal Orbs", "Boss", "Eater"),
     ("Final Boss drops # additional Lesser Eldritch Ichors", "Final Boss drops (2–4) additional Lesser Eldritch Ichors", "Boss", "Eater"),
@@ -174,6 +175,7 @@ namespace AltarHelper
     ("Gain #%% of Physical Damage as Extra Fire Damage", "Gain (70–130)%%%% of Physical Damage as Extra Fire Damage", "Minion", "Unknown"),
     ("Upside Eldritch Minions gain:", "Upside Eldritch Minions gain:", "Minion", "Eater"),
     ("#%% chance to drop an additional Divine Orb", "(1.6–3.2)%%%% chance to drop an additional Divine Orb", "Minion", "Both"),
+    ("#%% chance to drop an additional Ancient Orb", "(1.6–3.2)%%%% chance to drop an additional Ancient Orb", "Minion", "Both"),
     ("#%% chance to drop an additional Exalted Orb", "(1.6–3.2)%%%% chance to drop an additional Exalted Orb", "Minion", "Eater"),
     ("#%% chance to drop an additional Regal Orb", "(1.6–3.2)%%%% chance to drop an additional Regal Orb", "Minion", "Eater"),
     ("#%% chance to drop an additional Lesser Eldritch Ichor", "(1.6–3.2)%%%% chance to drop an additional Lesser Eldritch Ichor", "Minion", "Eater"),
