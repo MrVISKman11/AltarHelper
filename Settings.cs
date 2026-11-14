@@ -130,40 +130,36 @@ namespace AltarHelper
                                         // Clear all prior ModTiers to ensure a clean slate, or let existing non-scarab weights persist?
                                         // Let existing weights persist, just overwrite Scarabs so player can configure everything else separately.
                                         
-                                        // First, iterate over all Altar Mods that mention "Scarab"
+                                        // First, iterate over all Altar Mods that mention "Scarab" or "Thread"
                                         foreach (var mod in AltarModsConstants.AltarTypes)
                                         {
-                                            if (mod.Name.Contains("Scarab", StringComparison.InvariantCultureIgnoreCase))
+                                            if (mod.Name.Contains("Scarab", StringComparison.InvariantCultureIgnoreCase) || mod.Name.Contains("Thread", StringComparison.InvariantCultureIgnoreCase))
                                             {
-                                                // Extract the base scarab name from the mod text, e.g. "Harvest Scarab"
-                                                // Regex match or simple string splitting. 
-                                                // "Final Boss drops # additional Harvest Scarabs" -> "Harvest Scarab"
-                                                // "(1.6-3.2)% chance to drop an additional Harvest Scarab" -> "Harvest Scarab"
                                                 string baseName = "";
                                                 var words = mod.Name.Split(' ');
                                                 for (int i = 0; i < words.Length; i++)
                                                 {
-                                                    if (words[i].StartsWith("Scarab", StringComparison.InvariantCultureIgnoreCase))
+                                                    if (words[i].StartsWith("Scarab", StringComparison.InvariantCultureIgnoreCase) || words[i].StartsWith("Thread", StringComparison.InvariantCultureIgnoreCase))
                                                     {
+                                                        string itemType = words[i].StartsWith("Scarab", StringComparison.InvariantCultureIgnoreCase) ? "Scarab" : "Thread";
                                                         if (i > 0)
                                                         {
                                                             string prevWord = words[i - 1];
                                                             if (prevWord.Equals("additional", StringComparison.InvariantCultureIgnoreCase) ||
                                                                 prevWord.Equals("Miscellaneous", StringComparison.InvariantCultureIgnoreCase) ||
                                                                 prevWord.Equals("drops", StringComparison.InvariantCultureIgnoreCase)) {
-                                                                    // For generic "drop an additional Scarab" modes
-                                                                    baseName = "Scarab"; 
+                                                                    baseName = itemType; 
                                                             } else {
-                                                                baseName = $"{prevWord} Scarab";
+                                                                baseName = $"{prevWord} {itemType}";
                                                             }
                                                         }
-                                                        else baseName = "Scarab";
+                                                        else baseName = itemType;
                                                         break;
                                                     }
                                                 }
 
                                                 if (string.IsNullOrEmpty(baseName)) continue;
-                                                if (baseName == "Scarab") continue; // Skip generic catch-all duplication modifiers for now
+                                                if (baseName == "Scarab" || baseName == "Thread") continue; // Skip generic catch-all duplication modifiers for now
 
                                                 // Find all ninja lines containing this base name
                                                 float totalChaos = 0;
