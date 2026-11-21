@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>Library</OutputType>
@@ -25,7 +25,7 @@
       <HintPath>..\..\..\GameOffsets.dll</HintPath>
     </Reference>
     <Reference Include="Hexa.NET.ImGui">
-      <HintPath>$(exapiPackage)\Hexa.NET.ImGui.dll</HintPath>
+      <HintPath>..\..\..\Hexa.NET.ImGui.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

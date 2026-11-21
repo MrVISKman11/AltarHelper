@@ -1,4 +1,6 @@
+#nullable enable
 using ExileCore;
+using ExileCore.PoEMemory;
 using ExileCore.PoEMemory.Elements;
 using ExileCore.Shared.Cache;
 using SharpDX;
@@ -7,7 +9,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Linq;
 using System.Runtime.Versioning;
 
 namespace AltarHelper
@@ -32,14 +33,21 @@ namespace AltarHelper
             ReadFilterFile();
             //PlaySound();
 
+            var defaultProfile = Settings.SelectedProfile?.Value ?? "3.30-STD";
+            Settings.LoadProfile(defaultProfile);
+
             LabelCache = new FrameCache<List<LabelOnGround>>(UpdateAltarLabelList);
             return true;
         }
-        private List<LabelOnGround> UpdateAltarLabelList() => GameController.IngameState.IngameUi.ItemsOnGroundLabelsVisible.Count == 0 ? new List<LabelOnGround>() :
-            GameController.IngameState.IngameUi.ItemsOnGroundLabelsVisible.
-                Where(x =>
-                    x.ItemOnGround.Metadata == "Metadata/MiscellaneousObjects/PrimordialBosses/TangleAltar" ||
-                    x.ItemOnGround.Metadata == "Metadata/MiscellaneousObjects/PrimordialBosses/CleansingFireAltar").ToList();
+        private List<LabelOnGround> UpdateAltarLabelList()
+        {
+            var labels = GameController?.IngameState?.IngameUi?.ItemsOnGroundLabelsVisible;
+            if (labels == null || labels.Count == 0) return new List<LabelOnGround>();
+
+            return labels.Where(x => x?.ItemOnGround?.Metadata != null &&
+                (x.ItemOnGround.Metadata.Contains("TangleAltar") ||
+                 x.ItemOnGround.Metadata.Contains("CleansingFireAltar"))).ToList();
+        }
         private void ReadFilterFile()
         {
             var path = $"{DirectoryFullName}\\{FILTER_FILE}";
@@ -154,87 +162,220 @@ namespace AltarHelper
 
         private void CompareWeights()
         {
-            //filter visible labels and work only on the actual altar ones
-            var Altars = LabelCache.Value;
-            if (Altars.Count <= 0) return;
-            //complicated looking weight logic starts here....
-            foreach (var altarlabel in Altars)
+            try
             {
-                var topOptionLabel = altarlabel.Label.GetChildAtIndex(0);
-                var bottomOptionLabel = altarlabel.Label.GetChildAtIndex(1);
-                string? topOptionText = topOptionLabel.GetChildAtIndex(1)?.GetText(512);
-                string? bottomOptionText = bottomOptionLabel.GetChildAtIndex(1)?.GetText(512);
+                var Altars = LabelCache.Value;
+                if (Altars == null || Altars.Count <= 0) return;
 
-                if (Settings.DebugSettings.DebugRawText == true) DebugWindow.LogError($"AltarBottom Length 512 : {bottomOptionText}");
-                if (Settings.DebugSettings.DebugRawText == true) DebugWindow.LogError($"AltarTop Length 512 : {topOptionText}");
-                if (topOptionText == null || bottomOptionText == null) continue;
-
-                Altar altar = new(GetSelectionData(topOptionText), GetSelectionData(bottomOptionText));
-                if (altar == null) continue;
-
-                if (altar.Top.UpsideWeight == 0 &&
-                    altar.Bottom.UpsideWeight == 0 &&
-                    altar.Top.DownsideWeight == 0 &&
-                    altar.Bottom.DownsideWeight == 0) continue;
-
-                int topOptionWeight = 0;
-                int bottomOptionWeight = 0;
-
-               
-
-                if (Settings.AltarSettings.SwitchMode.Value == 2)
+                foreach (var altarlabel in Altars)
                 {
-                    if (altar.Top.Target == AffectedTarget.Minions || altar.Top.Target == AffectedTarget.Player)
+                    if (altarlabel?.Label == null) continue;
+
+                    var topOptionLabel = altarlabel.Label.GetChildAtIndex(0);
+                    var bottomOptionLabel = altarlabel.Label.GetChildAtIndex(1);
+                    if (topOptionLabel == null || bottomOptionLabel == null) continue;
+
+                    string? topOptionText = GetOptionText(topOptionLabel);
+                    string? bottomOptionText = GetOptionText(bottomOptionLabel);
+
+                    if (Settings.DebugSettings.DebugRawText == true)
                     {
-                        topOptionWeight += altar.Top.UpsideWeight - altar.Top.DownsideWeight;
+                        DebugWindow.LogError($"AltarTop : {topOptionText}");
+                        DebugWindow.LogError($"AltarBottom : {bottomOptionText}");
                     }
-                    if (altar.Bottom.Target == AffectedTarget.Minions || altar.Bottom.Target == AffectedTarget.Player)
+                    if (string.IsNullOrWhiteSpace(topOptionText) || string.IsNullOrWhiteSpace(bottomOptionText)) continue;
+
+                    Altar altar = new(GetSelectionData(topOptionText), GetSelectionData(bottomOptionText));
+                    if (altar == null) continue;
+
+                    if (altar.Top.UpsideWeight == 0 &&
+                        altar.Bottom.UpsideWeight == 0 &&
+                        altar.Top.DownsideWeight == 0 &&
+                        altar.Bottom.DownsideWeight == 0) continue;
+
+                    int topOptionWeight = 0;
+                    int bottomOptionWeight = 0;
+
+                    if (Settings.AltarSettings.SwitchMode.Value == 2)
                     {
-                        bottomOptionWeight += altar.Bottom.UpsideWeight - altar.Bottom.DownsideWeight;
+                        if (altar.Top.Target == AffectedTarget.Minions || altar.Top.Target == AffectedTarget.Player)
+                        {
+                            topOptionWeight += altar.Top.UpsideWeight - altar.Top.DownsideWeight;
+                        }
+                        if (altar.Bottom.Target == AffectedTarget.Minions || altar.Bottom.Target == AffectedTarget.Player)
+                        {
+                            bottomOptionWeight += altar.Bottom.UpsideWeight - altar.Bottom.DownsideWeight;
+                        }
                     }
-                }
-                else if (Settings.AltarSettings.SwitchMode.Value == 3)
-                {
-                    if (altar.Top.Target == AffectedTarget.FinalBoss || altar.Top.Target == AffectedTarget.Player)
+                    else if (Settings.AltarSettings.SwitchMode.Value == 3)
                     {
-                        topOptionWeight += altar.Top.UpsideWeight - altar.Top.DownsideWeight;
+                        if (altar.Top.Target == AffectedTarget.FinalBoss || altar.Top.Target == AffectedTarget.Player)
+                        {
+                            topOptionWeight += altar.Top.UpsideWeight - altar.Top.DownsideWeight;
+                        }
+                        if (altar.Bottom.Target == AffectedTarget.FinalBoss || altar.Bottom.Target == AffectedTarget.Player)
+                        {
+                            bottomOptionWeight += altar.Bottom.UpsideWeight - altar.Bottom.DownsideWeight;
+                        }
                     }
-                    if (altar.Bottom.Target == AffectedTarget.FinalBoss || altar.Bottom.Target == AffectedTarget.Player)
+                    else
                     {
-                        bottomOptionWeight += altar.Bottom.UpsideWeight - altar.Bottom.DownsideWeight;
+                        topOptionWeight += altar.Top.UpsideWeight + altar.Top.DownsideWeight;
+                        bottomOptionWeight += altar.Bottom.UpsideWeight + altar.Bottom.DownsideWeight;
+                    }
+
+                    if (altar.Top.Target == AffectedTarget.Minions) topOptionWeight += Settings.AltarSettings.MinionWeight.Value;
+                    if (altar.Top.Target == AffectedTarget.FinalBoss) topOptionWeight += Settings.AltarSettings.BossWeight.Value;
+                    if (altar.Bottom.Target == AffectedTarget.Minions) bottomOptionWeight += Settings.AltarSettings.MinionWeight.Value;
+                    if (altar.Bottom.Target == AffectedTarget.FinalBoss) bottomOptionWeight += Settings.AltarSettings.BossWeight.Value;
+                    if (altar.Bottom.PlayAlert || altar.Top.PlayAlert) PlaySound();
+
+                    if (Settings.DebugSettings.DebugWeight)
+                    {
+                        TextDrawingList.Add(new(topOptionWeight.ToString(), new Vector2(topOptionLabel.GetClientRectCache.Center.X - 10, topOptionLabel.GetClientRectCache.Top - 25), Color.Cyan));
+                        TextDrawingList.Add(new(bottomOptionWeight.ToString(), new Vector2(bottomOptionLabel.GetClientRectCache.Center.X - 10, bottomOptionLabel.GetClientRectCache.Bottom + 15), Color.Cyan));
+                    }
+
+                    if (topOptionWeight < 0 || bottomOptionWeight < 0)
+                    {
+                        if (topOptionWeight < 0) RectangleDrawingList.Add(new(topOptionLabel.GetClientRectCache, Settings.AltarSettings.BadColor, Settings.AltarSettings.FrameThickness));
+                        if (bottomOptionWeight < 0) RectangleDrawingList.Add(new(bottomOptionLabel.GetClientRectCache, Settings.AltarSettings.BadColor, Settings.AltarSettings.FrameThickness));
+                    }
+
+                    if (topOptionWeight >= 0 || bottomOptionWeight >= 0)
+                    {
+                        if (topOptionWeight >= bottomOptionWeight && topOptionWeight > 0) RectangleDrawingList.Add(new(topOptionLabel.GetClientRectCache, GetColor(altar.Top.Target), Settings.AltarSettings.FrameThickness));
+                        if (bottomOptionWeight > topOptionWeight && bottomOptionWeight > 0) RectangleDrawingList.Add(new(bottomOptionLabel.GetClientRectCache, GetColor(altar.Bottom.Target), Settings.AltarSettings.FrameThickness));
                     }
                 }
-                else
-                {
-                    topOptionWeight += altar.Top.UpsideWeight + altar.Top.DownsideWeight;
-                    bottomOptionWeight += altar.Bottom.UpsideWeight + altar.Bottom.DownsideWeight;
-                }
+            }
+            catch (Exception ex)
+            {
+                DebugWindow.LogError($"AltarHelper CompareWeights Error: {ex.Message}");
+            }
+        }
 
-                if (altar.Top.Target == AffectedTarget.Minions) topOptionWeight += Settings.AltarSettings.MinionWeight.Value;
-                if (altar.Top.Target == AffectedTarget.FinalBoss) topOptionWeight += Settings.AltarSettings.BossWeight.Value;
-                if (altar.Bottom.Target == AffectedTarget.Minions) bottomOptionWeight += Settings.AltarSettings.MinionWeight.Value;
-                if (altar.Bottom.Target == AffectedTarget.FinalBoss) bottomOptionWeight += Settings.AltarSettings.BossWeight.Value;
-                if (altar.Bottom.PlayAlert || altar.Top.PlayAlert) PlaySound();
+        public static string NormalizeModText(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
 
-                if (Settings.DebugSettings.DebugWeight)
-                {
-                    TextDrawingList.Add(new(topOptionWeight.ToString(), new Vector2(topOptionLabel.GetClientRectCache.Center.X - 10, topOptionLabel.GetClientRectCache.Top - 25), Color.Cyan));
-                    TextDrawingList.Add(new(bottomOptionWeight.ToString(), new Vector2(bottomOptionLabel.GetClientRectCache.Center.X - 10, bottomOptionLabel.GetClientRectCache.Bottom + 15), Color.Cyan));
-                    //  DebugWindow.LogError($"UpperWeight: {UpperWeight} | DownerWeight: {DownerWeight}");
-                }
+            // 1. Replace unicode en-dash, em-dash, and minus signs with ascii hyphen
+            string result = text.Replace('–', '-').Replace('—', '-').Replace('−', '-');
 
-                if (topOptionWeight < 0 || bottomOptionWeight < 0)
-                {
-                    if (topOptionWeight < 0) RectangleDrawingList.Add(new(topOptionLabel.GetClientRectCache, Settings.AltarSettings.BadColor, Settings.AltarSettings.FrameThickness));
-                    if (bottomOptionWeight < 0) RectangleDrawingList.Add(new(bottomOptionLabel.GetClientRectCache, Settings.AltarSettings.BadColor, Settings.AltarSettings.FrameThickness));
-                }
+            // 2. Strip XML/PoE formatting tags <...> (like <link:...>, <hover:...>, <enchanted>, etc.)
+            result = Regex.Replace(result, @"<[^>]+>", "");
 
-                if (topOptionWeight >= 0 || bottomOptionWeight >= 0)
+            // 3. Strip braces and brackets
+            result = result.Replace("{", "").Replace("}", "").Replace("[", "").Replace("]", "");
+
+            // 4. Normalize parenthesized/bracketed number ranges or values e.g. (2-4), (1.6-3.2), (15-30) to #
+            result = Regex.Replace(result, @"\([^()]*\)", "#");
+
+            // 5. Normalize standalone numeric ranges like 1.6-3.2 or 2-4 to #
+            result = Regex.Replace(result, @"\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?", "#");
+
+            // 6. Normalize isolated decimal or integer numbers to #
+            result = Regex.Replace(result, @"\d+(?:\.\d+)?", "#");
+
+            // 7. Collapse multiple hashes e.g. #-# or ## or (#) -> #
+            result = Regex.Replace(result, @"#\s*-\s*#", "#");
+            result = Regex.Replace(result, @"#+", "#");
+            result = Regex.Replace(result, @"%+ ", "% ");
+            result = Regex.Replace(result, @"%+", "%");
+
+            // 8. Collapse whitespace and trim
+            result = Regex.Replace(result, @"\s+", " ").Trim();
+
+            return result;
+        }
+
+        private string? GetOptionText(Element? optionLabel)
+        {
+            if (optionLabel == null) return null;
+
+            var child1 = optionLabel.GetChildAtIndex(1);
+            var child0 = optionLabel.GetChildAtIndex(0);
+
+            Element? mainElement = null;
+            string? mainText = null;
+
+            // Check standard index 1 first
+            if (child1 != null)
+            {
+                var t = child1.GetText(512);
+                if (string.IsNullOrWhiteSpace(t)) t = child1.Text;
+                if (!string.IsNullOrWhiteSpace(t))
                 {
-                    if (topOptionWeight >= bottomOptionWeight && topOptionWeight > 0) RectangleDrawingList.Add(new(topOptionLabel.GetClientRectCache, GetColor(altar.Top.Target), Settings.AltarSettings.FrameThickness));
-                    if (bottomOptionWeight > topOptionWeight && bottomOptionWeight > 0) RectangleDrawingList.Add(new(bottomOptionLabel.GetClientRectCache, GetColor(altar.Bottom.Target), Settings.AltarSettings.FrameThickness));
-                    continue;
+                    mainElement = child1;
+                    mainText = t;
                 }
+            }
+
+            // Fallback to index 0 if index 1 has no text
+            if (string.IsNullOrWhiteSpace(mainText) && child0 != null)
+            {
+                var t = child0.GetText(512);
+                if (string.IsNullOrWhiteSpace(t)) t = child0.Text;
+                if (!string.IsNullOrWhiteSpace(t))
+                {
+                    mainElement = child0;
+                    mainText = t;
+                }
+            }
+
+            // Fallback to self
+            if (string.IsNullOrWhiteSpace(mainText))
+            {
+                var t = optionLabel.GetText(512);
+                if (string.IsNullOrWhiteSpace(t)) t = optionLabel.Text;
+                if (!string.IsNullOrWhiteSpace(t))
+                {
+                    mainElement = optionLabel;
+                    mainText = t;
+                }
+            }
+
+            // Check if any child elements contain hyperlink text that was split into sub-elements
+            var fullElement = mainElement ?? optionLabel;
+            var subTexts = new List<string>();
+            CollectSubElementTexts(fullElement, subTexts);
+
+            if (string.IsNullOrWhiteSpace(mainText))
+            {
+                if (subTexts.Count > 0)
+                {
+                    return string.Join("\n", subTexts);
+                }
+                return null;
+            }
+
+            // If mainText is present, check if sub-elements have missing tokens (e.g. hyperlinked item names like "Breach Thread")
+            foreach (var sub in subTexts)
+            {
+                var cleanSub = Regex.Replace(sub, @"<[^>]+>", "").Trim();
+                if (!string.IsNullOrWhiteSpace(cleanSub) && !mainText.Contains(cleanSub, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // Hyperlink text was in a child element and not present in mainText! Append to ensure complete sentence
+                    mainText = $"{mainText} {cleanSub}";
+                }
+            }
+
+            return mainText;
+        }
+
+        private static void CollectSubElementTexts(Element? elem, List<string> collected)
+        {
+            if (elem == null || elem.Children == null) return;
+            foreach (var child in elem.Children)
+            {
+                if (child == null) continue;
+                var t = child.GetText(512);
+                if (string.IsNullOrWhiteSpace(t)) t = child.Text;
+                if (!string.IsNullOrWhiteSpace(t))
+                {
+                    collected.Add(t.Trim());
+                }
+                CollectSubElementTexts(child, collected);
             }
         }
 
@@ -282,59 +423,95 @@ namespace AltarHelper
 
         public Selection GetSelectionData(string altarLabelText)
         {
-            AffectedTarget Target;
+            AffectedTarget target = AffectedTarget.Any;
             List<string> downsides = new();
             List<string> upsides = new();
 
+            if (string.IsNullOrWhiteSpace(altarLabelText))
+            {
+                return new Selection
+                {
+                    Target = target,
+                    Downsides = downsides,
+                    Upsides = upsides
+                };
+            }
+
+            // Determine Target robustly without throwing exceptions on tags
+            if (altarLabelText.Contains("Minion", StringComparison.OrdinalIgnoreCase))
+                target = AffectedTarget.Minions;
+            else if (altarLabelText.Contains("boss", StringComparison.OrdinalIgnoreCase))
+                target = AffectedTarget.FinalBoss;
+            else if (altarLabelText.Contains("Player", StringComparison.OrdinalIgnoreCase))
+                target = AffectedTarget.Player;
+
             using (StringReader stringreader = new(altarLabelText))
             {
-                string targetLine = stringreader.ReadLine();
-                Target = AltarModsConstants.AltarTargetDict[targetLine[("<valuedefault>{".Length)..^1]];
-
-                string line;
+                string? line;
                 bool upsideSectionReached = false;
-                // LogError("Ets");
+
                 while ((line = stringreader.ReadLine()) != null)
                 {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
 
-                    if (line.StartsWith("<enchanted>"))
+                    // Skip the target header line
+                    if (line.Contains("gain:", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("gains:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    // Clean all PoE markup tags <...> and braces/brackets { } [ ]
+                    string cleanLine = Regex.Replace(line, @"<[^>]+>", "");
+                    cleanLine = cleanLine.Replace("{", "").Replace("}", "").Replace("[", "").Replace("]", "").Trim();
+
+                    if (string.IsNullOrWhiteSpace(cleanLine)) continue;
+
+                    bool isLineUpside =
+                        line.Contains("<enchanted>", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("<rgb(127,127,255)>", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("<currency>", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("<unique>", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("<divination>", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("<link", StringComparison.OrdinalIgnoreCase) ||
+                        line.Contains("<hover", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("drops ", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("chance to drop", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("chance to be Duplicated", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("increased Quantity", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("increased Rarity", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("Thread", StringComparison.OrdinalIgnoreCase) ||
+                        cleanLine.Contains("Scarab", StringComparison.OrdinalIgnoreCase);
+
+                    if (isLineUpside)
                     {
                         upsideSectionReached = true;
                     }
+
                     if (upsideSectionReached)
                     {
-                        line = (line.StartsWith("<enchanted>")) ? line.Replace("<enchanted>{", "") : line.Replace("}", "");
-                        if (line.Contains('}')) line = line.Replace("}", "");
-                        if (line.StartsWith("<rgb"))
-                        {
-                            line = line[(line.IndexOf('{') + 1)..^1];
-                        }
-                        //String with range operator to cut trim unneeded tags
-                        upsides.Add(line);
-                        continue;
+                        upsides.Add(cleanLine);
                     }
-                    downsides.Add(line);
+                    else
+                    {
+                        downsides.Add(cleanLine);
+                    }
                 }
             }
-            //if (Settings.DebugSettings.DebugRawText)
-            //{
-            //    DebugWindow.LogMsg($"Target: {Target}");
-            //    DebugWindow.LogMsg($"Downsides:\n{string.Join('\n', downsides)}");
-            //    DebugWindow.LogMsg($"Upsides:\n{string.Join('\n', upsides)}");
-            //}
 
             List<FilterEntry> UpsideFilterEntryMatches = new();
             List<FilterEntry> DownsideFilterEntryMatches = new();
 
             foreach (string entry in upsides)
             {
+                var normalizedUpside = NormalizeModText(entry);
+                if (Settings.DebugSettings.DebugBuffs) DebugWindow.LogMsg(normalizedUpside);
 
-                var upside = Regex.Replace(entry, @"((\d+)(?:.\d)|\d+)", "#");
-
-
-                if (Settings.DebugSettings.DebugBuffs) DebugWindow.LogMsg(upside);
-                var filterentry = GetEntry(upside);
-               // FilterEntry filterentry = FilterList.FirstOrDefault(element => element.Mod.Contains(upside));
+                var filterentry = GetEntry(normalizedUpside);
+                if (filterentry == null || filterentry.Weight == 0)
+                {
+                    filterentry = GetEntry(entry);
+                }
                 if (filterentry == null) continue;
 
                 UpsideFilterEntryMatches.Add(filterentry);
@@ -343,12 +520,14 @@ namespace AltarHelper
 
             foreach (string entry in downsides)
             {
-                var downside = Regex.Replace(entry, @"((\d+)(?:.\d)|\d+)", "#");
+                var normalizedDownside = NormalizeModText(entry);
                 if (Settings.DebugSettings.DebugDebuffs) DebugWindow.LogMsg(entry);
 
-                var filterentry = GetEntry(downside);
-
-                //FilterEntry filterentry = FilterList.FirstOrDefault(element => element.Mod.Contains(downside));
+                var filterentry = GetEntry(normalizedDownside);
+                if (filterentry == null || filterentry.Weight == 0)
+                {
+                    filterentry = GetEntry(entry);
+                }
                 if (filterentry == null) continue;
 
                 DownsideFilterEntryMatches.Add(filterentry);
@@ -359,7 +538,7 @@ namespace AltarHelper
             {
                 Upsides = upsides,
                 Downsides = downsides,
-                Target = Target,
+                Target = target,
 
                 UpsideWeight = (UpsideFilterEntryMatches.Count > 0) ? UpsideFilterEntryMatches.Sum(x => x.Weight) : 0,
                 DownsideWeight = (DownsideFilterEntryMatches.Count > 0) ? DownsideFilterEntryMatches.Sum(x => x.Weight) : 0,
@@ -371,26 +550,62 @@ namespace AltarHelper
             return selection;
         }
 
-
-
-
         public FilterEntry GetEntry(string mod)
         {
-            var cleanMod = mod.Replace("%%", "%");
+            var cleanMod = mod.Replace("%%", "%").Trim();
+            var normalizedMod = NormalizeModText(mod);
+
             var matchedMod = AltarModsConstants.AltarTypes.FirstOrDefault(t =>
-                t.Id.Contains(mod, StringComparison.InvariantCultureIgnoreCase) ||
-                t.Id.Replace("%%", "%").Contains(cleanMod, StringComparison.InvariantCultureIgnoreCase));
+            {
+                var tClean = t.Id.Replace("%%", "%").Trim();
+                var tNorm = NormalizeModText(t.Id);
+                var tNameNorm = NormalizeModText(t.Name);
+
+                // Exact or normalized match
+                if (t.Id.Equals(mod, StringComparison.InvariantCultureIgnoreCase) ||
+                    tClean.Equals(cleanMod, StringComparison.InvariantCultureIgnoreCase) ||
+                    tNorm.Equals(normalizedMod, StringComparison.InvariantCultureIgnoreCase) ||
+                    tNameNorm.Equals(normalizedMod, StringComparison.InvariantCultureIgnoreCase) ||
+                    t.Name.Equals(mod, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+
+                // Substring containment match
+                if (tClean.Contains(cleanMod, StringComparison.InvariantCultureIgnoreCase) ||
+                    cleanMod.Contains(tClean, StringComparison.InvariantCultureIgnoreCase) ||
+                    tNorm.Contains(normalizedMod, StringComparison.InvariantCultureIgnoreCase) ||
+                    normalizedMod.Contains(tNorm, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+
+                // Singular vs Plural match (e.g. Thread vs Threads)
+                var normSingular = normalizedMod.TrimEnd('s');
+                var tNormSingular = tNorm.TrimEnd('s');
+                if (normSingular.Equals(tNormSingular, StringComparison.InvariantCultureIgnoreCase) ||
+                    normSingular.Contains(tNormSingular, StringComparison.InvariantCultureIgnoreCase) ||
+                    tNormSingular.Contains(normSingular, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+
+                return false;
+            });
 
             var canonicalId = matchedMod.Id != null ? matchedMod.Id : mod;
 
             var modWeight = Settings.GetModTier(canonicalId);
             if (modWeight == 0) modWeight = Settings.GetModTier(cleanMod);
+            if (modWeight == 0) modWeight = Settings.GetModTier(normalizedMod);
+            if (modWeight == 0 && matchedMod.Id != null) modWeight = Settings.GetModTier(matchedMod.Id.Replace("%%", "%"));
+            if (modWeight == 0 && matchedMod.Name != null) modWeight = Settings.GetModTier(matchedMod.Name);
 
-            var modAlert = Settings.GetModAlert(canonicalId) || Settings.GetModAlert(cleanMod);
+            var modAlert = Settings.GetModAlert(canonicalId) || Settings.GetModAlert(cleanMod) ||
+                           Settings.GetModAlert(normalizedMod) ||
+                           (matchedMod.Id != null && Settings.GetModAlert(matchedMod.Id.Replace("%%", "%")));
 
-            var modName = mod.Contains('(') && mod.Contains(')') ?
-                            Regex.Replace(mod, @"\([^()]*\)", "#") :
-                            Regex.Replace(mod, @"(\d+)(?:.\d)|\d+", "#");
+            var modName = string.IsNullOrEmpty(matchedMod.Id) ? normalizedMod : matchedMod.Id;
 
             var modType = matchedMod.Type;
 
@@ -401,7 +616,7 @@ namespace AltarHelper
                 IsUpside = modWeight > 0 ? true : false,
                 Target = modType == null ?
                     AffectedTarget.Any :
-                    AltarModsConstants.FilterTargetDict[modType],
+                    (AltarModsConstants.FilterTargetDict.TryGetValue(modType, out var aff) ? aff : AffectedTarget.Any),
                 Alert = modAlert
             };
             return filter;

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ namespace AltarHelper
 
 
         public ToggleNode Enable { get; set; } = new ToggleNode(false);
+        public TextNode SelectedProfile { get; set; } = new TextNode("3.30-STD");
         public AltarSettings AltarSettings { get; set; } = new AltarSettings();
         public DebugSettings DebugSettings { get; set; } = new DebugSettings();
 
@@ -46,7 +48,19 @@ namespace AltarHelper
             var _pluginDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Compiled", "AltarHelper");
             var _profilesDir = Path.Combine(_pluginDir, "Profiles");
 
-            try { if (!Directory.Exists(_profilesDir)) Directory.CreateDirectory(_profilesDir); } catch { }
+            try
+            {
+                if (!Directory.Exists(_profilesDir)) Directory.CreateDirectory(_profilesDir);
+                var sourceProfilesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "AltarHelper", "Profiles");
+                if (Directory.Exists(sourceProfilesDir))
+                {
+                    foreach (var file in Directory.GetFiles(sourceProfilesDir, "*.json"))
+                    {
+                        var dest = Path.Combine(_profilesDir, Path.GetFileName(file));
+                        if (!File.Exists(dest)) File.Copy(file, dest);
+                    }
+                }
+            } catch { }
 
 #pragma warning disable CA1416 // Validar a compatibilidade da plataforma
             Tribes = new CustomNode
@@ -60,6 +74,8 @@ namespace AltarHelper
                         {
                             profiles = Directory.GetFiles(_profilesDir, "*.json")
                                 .Select(Path.GetFileNameWithoutExtension)
+                                .Where(x => !string.IsNullOrEmpty(x))
+                                .Select(x => x!)
                                 .ToList();
                         }
                         
@@ -75,26 +91,32 @@ namespace AltarHelper
 
                         if (profiles.Count > 0)
                         {
-                            ImGui.Combo("##ProfileSelect", ref selectedProfileIndex, profiles.ToArray(), profiles.Count);
+                            var targetProfile = SelectedProfile?.Value ?? "3.30-STD";
+                            var foundIdx = profiles.IndexOf(targetProfile);
+                            if (foundIdx >= 0)
+                            {
+                                selectedProfileIndex = foundIdx;
+                            }
+                            else if (selectedProfileIndex >= profiles.Count || selectedProfileIndex < 0)
+                            {
+                                selectedProfileIndex = 0;
+                            }
+
+                            if (ImGui.Combo("##ProfileSelect", ref selectedProfileIndex, profiles.ToArray(), profiles.Count))
+                            {
+                                if (selectedProfileIndex >= 0 && selectedProfileIndex < profiles.Count && SelectedProfile != null)
+                                {
+                                    SelectedProfile.Value = profiles[selectedProfileIndex];
+                                }
+                            }
                             ImGui.SameLine();
                             if (ImGui.Button("Load Profile"))
                             {
                                 if (selectedProfileIndex >= 0 && selectedProfileIndex < profiles.Count)
                                 {
-                                    var loadPath = Path.Combine(_profilesDir, $"{profiles[selectedProfileIndex]}.json");
-                                    if (File.Exists(loadPath))
-                                    {
-                                        try
-                                        {
-                                            var json = File.ReadAllText(loadPath);
-                                            var loadedData = JsonConvert.DeserializeObject<dynamic>(json);
-                                            if (loadedData != null)
-                                            {
-                                                ModTiers = JsonConvert.DeserializeObject<Dictionary<string, int>>(loadedData.Tiers.ToString()) ?? new Dictionary<string, int>();
-                                                ModAlerts = JsonConvert.DeserializeObject<Dictionary<string, bool>>(loadedData.Alerts.ToString()) ?? new Dictionary<string, bool>();
-                                            }
-                                        } catch { }
-                                    }
+                                    var chosen = profiles[selectedProfileIndex];
+                                    if (SelectedProfile != null) SelectedProfile.Value = chosen;
+                                    LoadProfile(chosen);
                                 }
                             }
                         }
@@ -280,99 +302,220 @@ namespace AltarHelper
 
 
 
+        public void LoadProfile(string? profileName)
+        {
+            if (string.IsNullOrWhiteSpace(profileName)) return;
+            var _pluginDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Compiled", "AltarHelper");
+            var _profilesDir = Path.Combine(_pluginDir, "Profiles");
+            var loadPath = Path.Combine(_profilesDir, $"{profileName}.json");
+            if (!File.Exists(loadPath))
+            {
+                var sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "AltarHelper", "Profiles", $"{profileName}.json");
+                if (File.Exists(sourcePath))
+                {
+                    try { File.Copy(sourcePath, loadPath, true); } catch { }
+                    loadPath = sourcePath;
+                }
+            }
+            if (File.Exists(loadPath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(loadPath);
+                    var loadedData = JsonConvert.DeserializeObject<dynamic>(json);
+                    if (loadedData != null)
+                    {
+                        if (loadedData.Tiers != null)
+                        {
+                            ModTiers = JsonConvert.DeserializeObject<Dictionary<string, int>>(loadedData.Tiers.ToString()) ?? new Dictionary<string, int>();
+                        }
+                        if (loadedData.Alerts != null)
+                        {
+                            ModAlerts = JsonConvert.DeserializeObject<Dictionary<string, bool>>(loadedData.Alerts.ToString()) ?? new Dictionary<string, bool>();
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
         public int GetModTier(string mod)
         {
             if (string.IsNullOrEmpty(mod)) return 0;
             if (ModTiers.TryGetValue(mod, out var val)) return val;
-            var normalized = mod.Replace("%%", "%");
+            var normalized = mod.Replace("%%", "%").Trim();
             if (ModTiers.TryGetValue(normalized, out val)) return val;
-            var doublePercent = mod.Replace("%", "%%");
+            var doublePercent = mod.Replace("%", "%%").Trim();
             if (ModTiers.TryGetValue(doublePercent, out val)) return val;
+
+            var normMod = AltarHelperCore.NormalizeModText(mod);
+            if (ModTiers.TryGetValue(normMod, out val)) return val;
+            if (ModTiers.TryGetValue(normMod.Replace("%", "%%"), out val)) return val;
+
+            foreach (var kvp in ModTiers)
+            {
+                var kNorm = kvp.Key.Replace("%%", "%").Trim();
+                if (normalized.Contains(kNorm, StringComparison.InvariantCultureIgnoreCase) ||
+                    kNorm.Contains(normalized, StringComparison.InvariantCultureIgnoreCase) ||
+                    normMod.Contains(kNorm, StringComparison.InvariantCultureIgnoreCase) ||
+                    kNorm.Contains(normMod, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return kvp.Value;
+                }
+
+                // Singular vs Plural check
+                if (kNorm.TrimEnd('s').Equals(normalized.TrimEnd('s'), StringComparison.InvariantCultureIgnoreCase) ||
+                    kNorm.TrimEnd('s').Equals(normMod.TrimEnd('s'), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return kvp.Value;
+                }
+            }
+
             return 0;
         }
 
         public Dictionary<string, int> ModTiers = new()
         {
-            { "Final Boss drops # additional Divine Orbs", 700000000 },
-            { "Final Boss drops # additional Ancient Orbs", 500000 },
-            { "#%% chance to drop an additional Ancient Orb", 500000 },
-            { "#% chance to drop an additional Ancient Orb", 500000 },
-            { "#%% chance to drop an additional Divine Orb", 700000000 },
-            { "#% chance to drop an additional Divine Orb", 700000000 },
-            { "Final Boss drops # additional Breach Scarabs", 200000000 },
-            { "#%% chance to drop an additional Breach Scarab", 200000000 },
-            { "#% chance to drop an additional Breach Scarab", 200000000 },
-            { "Final Boss drops # additional Harvest Scarabs", 60000000 },
-            { "#%% chance to drop an additional Harvest Scarab", 60000000 },
-            { "#% chance to drop an additional Harvest Scarab", 60000000 },
-            { "Final Boss drops # additional Ambush Scarabs", 18000000 },
-            { "#%% chance to drop an additional Ambush Scarab", 18000000 },
-            { "#% chance to drop an additional Ambush Scarab", 18000000 },
-            { "Final Boss drops # additional Kalguuran Scarabs", 5500000 },
-            { "#%% chance to drop an additional Kalguuran Scarab", 5500000 },
-            { "#% chance to drop an additional Kalguuran Scarab", 5500000 },
-            { "Final Boss drops # additional Anarchy Scarabs", 1600000 },
-            { "#%% chance to drop an additional Anarchy Scarab", 1600000 },
-            { "#% chance to drop an additional Anarchy Scarab", 1600000 },
-            { "Final Boss drops # additional Ultimatum Scarabs", 500000 },
-            { "#%% chance to drop an additional Ultimatum Scarab", 500000 },
-            { "#% chance to drop an additional Ultimatum Scarab", 500000 },
-            { "Final Boss drops # additional Cartography Scarabs", 150000 },
-            { "#%% chance to drop an additional Cartography Scarab", 150000 },
-            { "#% chance to drop an additional Cartography Scarab", 150000 },
-            { "Final Boss drops # additional Bestiary Scarabs", 45000 },
-            { "#%% chance to drop an additional Bestiary Scarab", 45000 },
-            { "#% chance to drop an additional Bestiary Scarab", 45000 },
-            { "Basic Currency Items dropped by slain Enemies have #%% chance to be Duplicated", 13000 },
-            { "Basic Currency Items dropped by slain Enemies have #% chance to be Duplicated", 13000 },
-            { "Scarabs dropped by slain Enemies have #%% chance to be Duplicated", 13000 },
-            { "Scarabs dropped by slain Enemies have #% chance to be Duplicated", 13000 },
-            { "Final Boss drops # additional Grand Eldritch Embers", 9000 },
-            { "Final Boss drops # additional Grand Eldritch Ember", 9000 },
-            { "#%% chance to drop an additional Grand Eldritch Ember", 9000 },
-            { "#% chance to drop an additional Grand Eldritch Ember", 9000 },
-            { "Final Boss drops # additional Grand Eldritch Ichors", 6000 },
-            { "Final Boss drops # additional Grand Eldritch Ichor", 6000 },
-            { "#%% chance to drop an additional Grand Eldritch Ichor", 6000 },
-            { "#% chance to drop an additional Grand Eldritch Ichor", 6000 },
-            { "Divination Cards dropped by slain Enemies have #%% chance to be Duplicated", 4000 },
-            { "Divination Cards dropped by slain Enemies have #% chance to be Duplicated", 4000 },
-            { "Unique Items dropped by slain Enemies have #%% chance to be Duplicated", 4000 },
-            { "Unique Items dropped by slain Enemies have #% chance to be Duplicated", 4000 },
-            { "Maps dropped by slain Enemies have #%% chance to be Duplicated", 1200 },
-            { "Maps dropped by slain Enemies have #% chance to be Duplicated", 1200 },
-            { "#%% increased Quantity of Items found in this Area", 350 },
-            { "#% increased Quantity of Items found in this Area", 350 },
-            { "#%% increased Rarity of Items found in this Area", 101 },
-            { "#% increased Rarity of Items found in this Area", 101 }
+            // Tier 1: Jackpot Currency
+            { "Final Boss drops # additional Divine Orbs", 1000000000 },
+            { "#%% chance to drop an additional Divine Orb", 1000000000 },
+            { "#% chance to drop an additional Divine Orb", 1000000000 },
+
+            // Tier 2: Duplication Modifiers (Threads 4th, Unique Items last)
+            { "Basic Currency Items dropped by slain Enemies have #%% chance to be Duplicated", 100000 },
+            { "Basic Currency Items dropped by slain Enemies have #% chance to be Duplicated", 100000 },
+            { "Maps dropped by slain Enemies have #%% chance to be Duplicated", 90000 },
+            { "Maps dropped by slain Enemies have #% chance to be Duplicated", 90000 },
+            { "Divination Cards dropped by slain Enemies have #%% chance to be Duplicated", 80000 },
+            { "Divination Cards dropped by slain Enemies have #% chance to be Duplicated", 80000 },
+            { "Threads dropped by slain Enemies have #%% chance to be Duplicated", 70000 },
+            { "Threads dropped by slain Enemies have #% chance to be Duplicated", 70000 },
+            { "Unique Items dropped by slain Enemies have #%% chance to be Duplicated", 60000 },
+            { "Unique Items dropped by slain Enemies have #% chance to be Duplicated", 60000 },
+
+            // Tier 3: Item Rarity (above Thread mods)
+            { "#%% increased Rarity of Items found in this Area", 50000 },
+            { "#% increased Rarity of Items found in this Area", 50000 },
+
+            // Tier 4: Grand Eldritch (below dupe mods, no alerts)
+            { "Final Boss drops # additional Grand Eldritch Embers", 40000 },
+            { "Final Boss drops # additional Grand Eldritch Ember", 40000 },
+            { "#%% chance to drop an additional Grand Eldritch Ember", 40000 },
+            { "#% chance to drop an additional Grand Eldritch Ember", 40000 },
+            { "Final Boss drops # additional Grand Eldritch Ichors", 0 },
+            { "Final Boss drops # additional Grand Eldritch Ichor", 0 },
+            { "#%% chance to drop an additional Grand Eldritch Ichor", 0 },
+            { "#% chance to drop an additional Grand Eldritch Ichor", 0 },
+            { "Final Boss drops # additional Greater Eldritch Ichors", 0 },
+            { "Final Boss drops # additional Greater Eldritch Ichor", 0 },
+            { "#%% chance to drop an additional Greater Eldritch Ichor", 0 },
+            { "#% chance to drop an additional Greater Eldritch Ichor", 0 },
+            { "Final Boss drops # additional Lesser Eldritch Ichors", 0 },
+            { "Final Boss drops # additional Lesser Eldritch Ichor", 0 },
+            { "#%% chance to drop an additional Lesser Eldritch Ichor", 0 },
+            { "#% chance to drop an additional Lesser Eldritch Ichor", 0 },
+
+            // Tier 5: Priority Threads (Legion, Abyss, Bestiary)
+            { "Final Boss drops # additional Legion Threads", 30000 },
+            { "#%% chance to drop an additional Legion Thread", 30000 },
+            { "#% chance to drop an additional Legion Thread", 30000 },
+            { "Final Boss drops # additional Abyss Threads", 30000 },
+            { "#%% chance to drop an additional Abyss Thread", 30000 },
+            { "#% chance to drop an additional Abyss Thread", 30000 },
+            { "Final Boss drops # additional Bestiary Threads", 30000 },
+            { "#%% chance to drop an additional Bestiary Thread", 30000 },
+            { "#% chance to drop an additional Bestiary Thread", 30000 },
+
+            // Tier 6: Other Threads (Breach, Blight, Ritual, Incursion, Expedition, Betrayal, Ultimatum)
+            { "Final Boss drops # additional Breach Threads", 20000 },
+            { "#%% chance to drop an additional Breach Thread", 20000 },
+            { "#% chance to drop an additional Breach Thread", 20000 },
+            { "Final Boss drops # additional Blight Threads", 20000 },
+            { "#%% chance to drop an additional Blight Thread", 20000 },
+            { "#% chance to drop an additional Blight Thread", 20000 },
+            { "Final Boss drops # additional Ritual Threads", 20000 },
+            { "#%% chance to drop an additional Ritual Thread", 20000 },
+            { "#% chance to drop an additional Ritual Thread", 20000 },
+            { "Final Boss drops # additional Incursion Threads", 20000 },
+            { "#%% chance to drop an additional Incursion Thread", 20000 },
+            { "#% chance to drop an additional Incursion Thread", 20000 },
+            { "Final Boss drops # additional Expedition Threads", 20000 },
+            { "#%% chance to drop an additional Expedition Thread", 20000 },
+            { "#% chance to drop an additional Expedition Thread", 20000 },
+            { "Final Boss drops # additional Betrayal Threads", 20000 },
+            { "#%% chance to drop an additional Betrayal Thread", 20000 },
+            { "#% chance to drop an additional Betrayal Thread", 20000 },
+            { "Final Boss drops # additional Ultimatum Threads", 20000 },
+            { "#%% chance to drop an additional Ultimatum Thread", 20000 },
+            { "#% chance to drop an additional Ultimatum Thread", 20000 },
+
+            // Legacy Scarabs (kept for backward compatibility with older profile saves)
+            { "Final Boss drops # additional Breach Scarabs", 100000 },
+            { "#%% chance to drop an additional Breach Scarab", 100000 },
+            { "#% chance to drop an additional Breach Scarab", 100000 },
+            { "Final Boss drops # additional Harvest Scarabs", 100000 },
+            { "#%% chance to drop an additional Harvest Scarab", 100000 },
+            { "#% chance to drop an additional Harvest Scarab", 100000 },
+            { "Final Boss drops # additional Ambush Scarabs", 100000 },
+            { "#%% chance to drop an additional Ambush Scarab", 100000 },
+            { "#% chance to drop an additional Ambush Scarab", 100000 },
+            { "Final Boss drops # additional Kalguuran Scarabs", 100000 },
+            { "#%% chance to drop an additional Kalguuran Scarab", 100000 },
+            { "#% chance to drop an additional Kalguuran Scarab", 100000 },
+            { "Final Boss drops # additional Anarchy Scarabs", 100000 },
+            { "#%% chance to drop an additional Anarchy Scarab", 100000 },
+            { "#% chance to drop an additional Anarchy Scarab", 100000 },
+            { "Final Boss drops # additional Ultimatum Scarabs", 100000 },
+            { "#%% chance to drop an additional Ultimatum Scarab", 100000 },
+            { "#% chance to drop an additional Ultimatum Scarab", 100000 },
+            { "Final Boss drops # additional Cartography Scarabs", 100000 },
+            { "#%% chance to drop an additional Cartography Scarab", 100000 },
+            { "#% chance to drop an additional Cartography Scarab", 100000 },
+            { "Final Boss drops # additional Bestiary Scarabs", 100000 },
+            { "#%% chance to drop an additional Bestiary Scarab", 100000 },
+            { "#% chance to drop an additional Bestiary Scarab", 100000 },
+            { "Scarabs dropped by slain Enemies have #%% chance to be Duplicated", 20000 },
+            { "Scarabs dropped by slain Enemies have #% chance to be Duplicated", 20000 }
         };
 
         public bool GetModAlert(string mod)
         {
             if (string.IsNullOrEmpty(mod)) return false;
             if (ModAlerts.TryGetValue(mod, out var val)) return val;
-            var normalized = mod.Replace("%%", "%");
+            var normalized = mod.Replace("%%", "%").Trim();
             if (ModAlerts.TryGetValue(normalized, out val)) return val;
-            var doublePercent = mod.Replace("%", "%%");
+            var doublePercent = mod.Replace("%", "%%").Trim();
             if (ModAlerts.TryGetValue(doublePercent, out val)) return val;
+
+            var normMod = AltarHelperCore.NormalizeModText(mod);
+            if (ModAlerts.TryGetValue(normMod, out val)) return val;
+            if (ModAlerts.TryGetValue(normMod.Replace("%", "%%"), out val)) return val;
+
+            foreach (var kvp in ModAlerts)
+            {
+                var kNorm = kvp.Key.Replace("%%", "%").Trim();
+                if (normalized.Contains(kNorm, StringComparison.InvariantCultureIgnoreCase) ||
+                    kNorm.Contains(normalized, StringComparison.InvariantCultureIgnoreCase) ||
+                    normMod.Contains(kNorm, StringComparison.InvariantCultureIgnoreCase) ||
+                    kNorm.Contains(normMod, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return kvp.Value;
+                }
+
+                if (kNorm.TrimEnd('s').Equals(normalized.TrimEnd('s'), StringComparison.InvariantCultureIgnoreCase) ||
+                    kNorm.TrimEnd('s').Equals(normMod.TrimEnd('s'), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return kvp.Value;
+                }
+            }
+
             return false;
         }
         public Dictionary<string, bool> ModAlerts = new()
         {
             { "Final Boss drops # additional Divine Orbs", true },
-            { "Final Boss drops # additional Ancient Orbs", true },
-            { "#%% chance to drop an additional Ancient Orb", true },
-            { "#% chance to drop an additional Ancient Orb", true },
             { "#%% chance to drop an additional Divine Orb", true },
-            { "#% chance to drop an additional Divine Orb", true },
-            { "Final Boss drops # additional Breach Scarabs", true },
-            { "#%% chance to drop an additional Breach Scarab", true },
-            { "#% chance to drop an additional Breach Scarab", true },
-            { "Final Boss drops # additional Harvest Scarabs", true },
-            { "#%% chance to drop an additional Harvest Scarab", true },
-            { "#% chance to drop an additional Harvest Scarab", true },
-            { "#%% chance to drop an additional Grand Eldritch Ember", true },
-            { "#% chance to drop an additional Grand Eldritch Ember", true }
+            { "#% chance to drop an additional Divine Orb", true }
         };
 
 
